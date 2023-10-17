@@ -5,6 +5,7 @@ import pandas as pd
 from bs4 import BeautifulSoup as BS
 from math import sin, cos, sqrt, atan2, radians
 import pydeck as pdk
+import overpy
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
@@ -167,6 +168,24 @@ def generate_circle_points(lat, lon, radius, num_points=36):
 
 #     return list(road_dict.values())
 
+def get_osm_details(latitude, longitude):
+    api = overpy.Overpass()
+    # Query untuk mencari jalan di sekitar koordinat tertentu
+    query = f"""
+    way(around:50,{latitude},{longitude})["highway"];
+    (._;>;);
+    out body;
+    """
+    result = api.query(query)
+    if result.ways:  # Jika menemukan satu atau lebih jalan
+        way = result.ways[0]  # Ambil informasi dari jalan pertama
+        road_name = way.tags.get("name", "Unknown")
+        road_type = way.tags.get("highway", "Unknown")
+        return road_name, road_type
+    else:  # Jika tidak menemukan jalan
+        return "Unknown", "Unknown"
+
+
 def get_road_details_from_place_id(place_id, api_key):
     endpoint_url = f"https://maps.googleapis.com/maps/api/geocode/json?place_id={place_id}&key={api_key}"
     response = requests.get(endpoint_url)
@@ -205,12 +224,11 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         road_data = {}
         road_data['road_id'] = road_info.get('placeId')
         
-        road_name, road_type = get_road_details_from_place_id(road_data['road_id'], api_key)
-        road_data['road_name'] = road_name or 'Unknown'
+        # Get OSM road name and type using the function
+        road_name, road_type = get_osm_details(road_info.get('location', {}).get('latitude', 0),
+                                               road_info.get('location', {}).get('longitude', 0))
+        road_data['road_name'] = road_name
         road_data['road_type'] = road_type
-
-        # road_data['latitude'] = float(road_info['location']['latitude'])
-        # road_data['longitude'] = float(road_info['location']['longitude'])
 
         road_data['latitude'] = float(road_info.get('location', {}).get('latitude', 0))
         road_data['longitude'] = float(road_info.get('location', {}).get('longitude', 0))
