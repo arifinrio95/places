@@ -408,7 +408,7 @@ if st.button('Analyze'):
 
     # Parameters
     center = f"{lat_float},{lon_float}"
-    zoom = "5"
+    zoom = "25"
     size = "600x300"
     maptype = "roadmap"
     marker = f"color:red|label:C|{lat_float},{lon_float}"
