@@ -324,6 +324,32 @@ if st.button('Analyze'):
     st.subheader("Nearby Roads :")
     st.write(roads_df_sorted)
 
+    st.subheader("Effectivity Score :")
+    place_df_grouped['UserScore'] = place_df_grouped['Total User Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
+    place_df_grouped['DistanceScorePlace'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
+    
+    # 2. Hitung rata-rata UserScore dan DistanceScorePlace
+    avg_user_score = place_df_grouped['UserScore'].mean()
+    avg_distance_score_place = place_df_grouped['DistanceScorePlace'].mean()
+    
+    # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
+    road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
+    distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
+    
+    # 4. Hitung Effectivity Score
+    effectivity_score = (avg_user_score * avg_distance_score_place + road_intensity_score * distance_score_road) * 100
+    
+    # 5. Simpan ke DataFrame baru
+    df_effectivity = pd.DataFrame({
+        'Effectivity Score': [effectivity_score],
+        'Average User Score': [avg_user_score],
+        'Average Distance Score (Place)': [avg_distance_score_place],
+        'Road Intensity Score': [road_intensity_score],
+        'Distance Score (Road)': [distance_score_road]
+    })
+    
+    st.write(df_effectivity)
+
     st.subheader("Input Location Map:")
 
     # Convert lat and lon to float for arithmetic operations
