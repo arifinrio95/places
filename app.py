@@ -58,7 +58,7 @@ def get_nearby_places_2(latitude, longitude, api_key, rad):
 st.title("Nearby Places Analysis")
 
 # Taking inputs
-rad = st.number_input("Input Radius (in meters)", min_value=100, value=2000)
+rad = st.number_input("Input Radius (in meters)", min_value=10, value=200)
 latlong = st.text_input("Input location link", "")
 api_key = st.secrets('GOOGLE_API_KEY') # This is not secure. Consider using secrets management or Streamlit Secrets
 
