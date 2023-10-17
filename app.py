@@ -141,27 +141,30 @@ def get_osm_roads_within_radius(latitude, longitude, rad):
         return []
     
     data = response.json()
-    roads_data_list = []
+
+    road_dict = {}
 
     for element in data['elements']:
         if element['type'] == 'way':
-            road_data = {}
-            road_data['road_name'] = element['tags'].get('name', 'Unknown')
-            road_data['road_type'] = element['tags'].get('highway', 'Unknown')
+            road_id = element['id']
+            road_type = element['tags'].get('highway', 'Unknown')
 
-            min_distance = float("inf")
+            if road_id not in road_dict:
+                road_dict[road_id] = {
+                    'road_name': element['tags'].get('name', 'Unknown'),
+                    'road_type': road_type,
+                    'distance': float("inf")
+                }
+
             for geometry in element.get("geometry", []):
                 lat, lon = geometry['lat'], geometry['lon']
                 distance = calculate_distance(float(latitude), float(longitude), lat, lon)
-                if distance < min_distance:
-                    min_distance = distance
-                    road_data['latitude'] = lat
-                    road_data['longitude'] = lon
+                if distance < road_dict[road_id]['distance']:
+                    road_dict[road_id]['distance'] = distance
+                    road_dict[road_id]['latitude'] = lat
+                    road_dict[road_id]['longitude'] = lon
 
-            road_data['distance'] = min_distance
-            roads_data_list.append(road_data)
-
-    return roads_data_list
+    return list(road_dict.values())
 
 # Fungsi untuk mengembalikan nilai intensitas berdasarkan jenis jalan
 def assign_intensity(road_type):
