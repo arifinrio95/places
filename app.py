@@ -205,12 +205,12 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         road_data = {}
         road_data['road_id'] = road_info.get('placeId')
         
-        road_name, road_type = get_road_details_from_place_id(road_data['road_id'], api_key)
+        road_name, road_type = get_road_details_from_place_id(road_data['road_id'])
         road_data['road_name'] = road_name or 'Unknown'
         road_data['road_type'] = road_type
 
-        road_data['latitude'] = road_info['location']['latitude']
-        road_data['longitude'] = road_info['location']['longitude']
+        road_data['latitude'] = float(road_info['location']['latitude'])
+        road_data['longitude'] = float(road_info['location']['longitude'])
         road_data['distance'] = calculate_distance(latitude, longitude, road_data['latitude'], road_data['longitude'])
         roads_data_list.append(road_data)
 
