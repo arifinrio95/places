@@ -1,0 +1,21 @@
+/* Style the submit button with a specific background color etc */
+button {
+  background-color: #04AA6D;
+  width: 100%;
+  text-align: left;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* When moving the mouse over the submit button, add a light blue color */
+button:hover {
+  background-color: #c7f0e2;
+}
+
+/* Hide Streamlit Branding */
+#MainMenu {visibility: hidden;}
+/* footer {visibility: hidden;} */
+header {visibility: hidden;}
