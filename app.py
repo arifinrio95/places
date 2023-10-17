@@ -218,7 +218,7 @@ if st.button('Analyze'):
         'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
     }).reset_index()
     place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (in meters)']
-    sorted_df = place_df_grouped.sort_values(by='Total Users Rated', ascending=False).reset_index(drop=True)
+    sorted_df = place_df_grouped.sort_values(by='Distance (in meters)', ascending=True).reset_index(drop=True)
 
 
     st.subheader("Places Detail:")
@@ -227,9 +227,10 @@ if st.button('Analyze'):
     roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
     roads_df = pd.DataFrame(roads_data_list)
     roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type'].apply(assign_intensity))
+    roads_df_sorted = roads_df.sort_values(by='distance', ascending=True).reset_index(drop=True)
     
     st.subheader("Nearby Roads :")
-    st.write(roads_df)
+    st.write(roads_df_sorted)
 
     st.subheader("Input Location Map:")
 
