@@ -205,7 +205,7 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         road_data = {}
         road_data['road_id'] = road_info.get('placeId')
         
-        road_name, road_type = get_road_details_from_place_id(road_data['road_id'])
+        road_name, road_type = get_road_details_from_place_id(road_data['road_id'], api_key)
         road_data['road_name'] = road_name or 'Unknown'
         road_data['road_type'] = road_type
 
