@@ -122,16 +122,20 @@ if st.button('Analyze'):
 
     st.subheader("Input Location Map:")
 
+    # Convert lat and lon to float for arithmetic operations
+    lat_float = float(lat)
+    lon_float = float(lon)
+
     # Build the Google Maps Static API URL
     base_url = "https://maps.googleapis.com/maps/api/staticmap?"
 
     # Parameters
-    center = f"{lat},{lon}"
+    center = f"{lat_float},{lon_float}"
     zoom = "14"
     size = "600x300"
     maptype = "roadmap"
-    marker = f"color:red|label:C|{lat},{lon}"
-    path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat},{lon}|{lat+rad/111300},{lon}|{lat},{lon-rad/111300}|{lat-rad/111300},{lon}|{lat},{lon+rad/111300}|{lat+rad/111300},{lon}|{lat},{lon-rad/111300}"
+    marker = f"color:red|label:C|{lat_float},{lon_float}"
+    path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
 
     # Constructing the full URL
     map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
