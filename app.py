@@ -79,6 +79,18 @@ def get_nearby_places_2(latitude, longitude, api_key, rad):
         place_data_list.append(data)
     return place_data_list
 
+def generate_circle_points(lat, lon, radius, num_points=36):
+    """Generate points that approximate a circle on a map for a given latitude, longitude, and radius."""
+    points = []
+    for i in range(num_points):
+        angle = float(i) / num_points * (2.0 * 3.141592653589793)  # 2*Pi radians = 360 degrees
+        dx = radius * cos(angle)
+        dy = radius * sin(angle)
+        point_lat = lat + (dy / 111300)  # roughly 111.3km per degree of latitude
+        point_lon = lon + (dx / (111300 * cos(lat)))  # adjust for latitude in longitude calculation
+        points.append((point_lat, point_lon))
+    return points
+
 # Streamlit App UI
 st.title("Nearby Places Analysis")
 
@@ -137,9 +149,18 @@ if st.button('Analyze'):
     marker = f"color:red|label:C|{lat_float},{lon_float}"
     path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
 
-    # Constructing the full URL
-    map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
+    # # Constructing the full URL
+    # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
 
+    # Generate points for circle approximation
+    circle_points = generate_circle_points(lat_float, lon_float, rad)
+    
+    # Construct circle path string
+    circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+    
+    # Incorporate circle path into the full URL
+    map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
+    
     # Display the map in Streamlit
     st.image(map_url)
 
