@@ -98,7 +98,7 @@ if st.button('Analyze'):
     # Create DataFrame
     data = {
         'Total Places': [total_places],
-        'Total Ratings': [total_ratings],
+        # 'Total Ratings': [total_ratings],
         'Total Users Rated': [total_users_rated],
         'Density (places/m^2)': [density]
     }
