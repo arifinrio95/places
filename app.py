@@ -206,8 +206,8 @@ def get_road_details_from_place_id(place_id, api_key):
     # Here, the road type is not exactly provided by Google Geocoding API, 
     # but you can infer it from the road name or other properties.
     # I'm setting it to 'Unknown' for this example.
-    road_type = "Unknown"
-    return road_name, road_type
+    # road_type = "Unknown"
+    return road_name
 
 def get_google_roads_nearby(latitude, longitude, rad, api_key):
     endpoint_url = f"https://roads.googleapis.com/v1/nearestRoads?points={latitude},{longitude}&key={api_key}"
@@ -223,12 +223,14 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
     for road_info in data.get('snappedPoints', []):
         road_data = {}
         road_data['road_id'] = road_info.get('placeId')
+        road_name = get_road_details_from_place_id(road_data['road_id'], api_key)
         
         # Get OSM road name and type using the function
-        road_name, road_type = get_osm_details(road_info.get('location', {}).get('latitude', 0),
+        road_name_ver_OSM, road_type_ver_OSM = get_osm_details(road_info.get('location', {}).get('latitude', 0),
                                                road_info.get('location', {}).get('longitude', 0))
         road_data['road_name'] = road_name
-        road_data['road_type'] = road_type
+        road_data['road_name_ver_OSM'] = road_name_ver_OSM
+        road_data['road_type_ver_OSM'] = road_type_ver_OSM
 
         road_data['latitude'] = float(road_info.get('location', {}).get('latitude', 0))
         road_data['longitude'] = float(road_info.get('location', {}).get('longitude', 0))
