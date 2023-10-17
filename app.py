@@ -82,17 +82,17 @@ def get_nearby_places_2(latitude, longitude, api_key):
         place_data_list.append(data)
     return place_data_list
 
-# def generate_circle_points(lat, lon, radius, num_points=36):
-#     """Generate points that approximate a circle on a map for a given latitude, longitude, and radius."""
-#     points = []
-#     for i in range(num_points):
-#         angle = float(i) / num_points * (2.0 * 3.141592653589793)  # 2*Pi radians = 360 degrees
-#         dx = radius * cos(angle)
-#         dy = radius * sin(angle)
-#         point_lat = lat + (dy / 111300)  # roughly 111.3km per degree of latitude
-#         point_lon = lon + (dx / (111300 * cos(lat)))  # adjust for latitude in longitude calculation
-#         points.append((point_lat, point_lon))
-#     return points
+def generate_circle_points(lat, lon, radius, num_points=36):
+    """Generate points that approximate a circle on a map for a given latitude, longitude, and radius."""
+    points = []
+    for i in range(num_points):
+        angle = float(i) / num_points * (2.0 * 3.141592653589793)  # 2*Pi radians = 360 degrees
+        dx = radius * cos(angle)
+        dy = radius * sin(angle)
+        point_lat = lat + (dy / 111300)  # roughly 111.3km per degree of latitude
+        point_lon = lon + (dx / (111300 * cos(lat)))  # adjust for latitude in longitude calculation
+        points.append((point_lat, point_lon))
+    return points
 
 # def get_road_name_from_placeid(place_id, api_key):
 #     endpoint_url = "https://maps.googleapis.com/maps/api/place/details/json"
