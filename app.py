@@ -122,29 +122,48 @@ if st.button('Analyze'):
 
     st.subheader("Input Location Map:")
 
-    # Create a DataFrame for the input latitude and longitude
-    map_data = pd.DataFrame({'lat': [float(lat)], 'lon': [float(lon)]})
+    # Build the Google Maps Static API URL
+    base_url = "https://maps.googleapis.com/maps/api/staticmap?"
 
-    # Display map with circle overlay for the input radius
-    view_state = pdk.ViewState(
-        latitude=float(lat),
-        longitude=float(lon),
-        zoom=14,
-        pitch=0,
-        bearing=0
-    )
+    # Parameters
+    center = f"{lat},{lon}"
+    zoom = "14"
+    size = "600x300"
+    maptype = "roadmap"
+    marker = f"color:red|label:C|{lat},{lon}"
+    path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat},{lon}|{lat+rad/111300},{lon}|{lat},{lon-rad/111300}|{lat-rad/111300},{lon}|{lat},{lon+rad/111300}|{lat+rad/111300},{lon}|{lat},{lon-rad/111300}"
 
-    circle_layer = pdk.Layer(
-        "ScatterplotLayer",
-        map_data,
-        get_position=["lon", "lat"],
-        get_radius=rad,  # radius in meters
-        get_fill_color=[255, 0, 0, 100],
-        pickable=True,
-        stroked=True
-    )
+    # Constructing the full URL
+    map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
 
-    st.pydeck_chart(pdk.Deck(
-        layers=[circle_layer],
-        initial_view_state=view_state,
-    ))
+    # Display the map in Streamlit
+    st.image(map_url)
+
+    # st.subheader("Input Location Map:")
+
+    # # Create a DataFrame for the input latitude and longitude
+    # map_data = pd.DataFrame({'lat': [float(lat)], 'lon': [float(lon)]})
+
+    # # Display map with circle overlay for the input radius
+    # view_state = pdk.ViewState(
+    #     latitude=float(lat),
+    #     longitude=float(lon),
+    #     zoom=14,
+    #     pitch=0,
+    #     bearing=0
+    # )
+
+    # circle_layer = pdk.Layer(
+    #     "ScatterplotLayer",
+    #     map_data,
+    #     get_position=["lon", "lat"],
+    #     get_radius=rad,  # radius in meters
+    #     get_fill_color=[255, 0, 0, 100],
+    #     pickable=True,
+    #     stroked=True
+    # )
+
+    # st.pydeck_chart(pdk.Deck(
+    #     layers=[circle_layer],
+    #     initial_view_state=view_state,
+    # ))
