@@ -151,11 +151,28 @@ def get_osm_roads_within_radius(latitude, longitude, rad):
             road_data['road_type'] = element['tags'].get('highway', 'Unknown')
             road_data['latitude'] = element['center']['lat'] if 'center' in element else None
             road_data['longitude'] = element['center']['lon'] if 'center' in element else None
+            roads_df['intensitas'] = roads_df['road_type'].apply(assign_intensity)
             if road_data['latitude'] and road_data['longitude']:
                 road_data['distance'] = calculate_distance(float(latitude), float(longitude), road_data['latitude'], road_data['longitude'])
                 roads_data_list.append(road_data)
 
     return roads_data_list
+
+# Fungsi untuk mengembalikan nilai intensitas berdasarkan jenis jalan
+def assign_intensity(road_type):
+    intensity_map = {
+        'motorway': 10,
+        'trunk': 9,
+        'primary': 8,
+        'secondary': 7,
+        'tertiary': 6,
+        'unclassified': 5,
+        'residential': 4,
+        'service': 3,
+        'track': 2
+    }
+    # Jika road_type ada dalam intensity_map, kembalikan nilai intensitasnya, jika tidak kembalikan 1
+    return intensity_map.get(road_type, 1)
 
 # Streamlit App UI
 st.title("Nearby Places Analysis")
