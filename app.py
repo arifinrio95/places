@@ -121,6 +121,35 @@ def get_nearby_roads(latitude, longitude, api_key, rad):
         road_data_list.append(data)
     return road_data_list
 
+def get_osm_roads_within_radius(latitude, longitude, rad):
+    # Mengonversi radius dari meter ke derajat (sebagai perkiraan)
+    radius_in_degrees = rad / 111300
+    
+    overpass_url = "https://overpass-api.de/api/interpreter"
+    overpass_query = f"""
+    [out:json];
+    way(around:{radius_in_degrees},{latitude},{longitude})["highway"];
+    (._;>;);
+    out;
+    """
+    response = requests.get(overpass_url, params={'data': overpass_query})
+    data = response.json()
+
+    roads_data_list = []
+
+    for element in data['elements']:
+        if element['type'] == 'way':
+            road_data = {}
+            road_data['road_name'] = element['tags'].get('name', 'Unknown')
+            road_data['road_type'] = element['tags'].get('highway', 'Unknown')
+            road_data['latitude'] = element['center']['lat'] if 'center' in element else None
+            road_data['longitude'] = element['center']['lon'] if 'center' in element else None
+            if road_data['latitude'] and road_data['longitude']:
+                road_data['distance'] = calculate_distance(float(latitude), float(longitude), road_data['latitude'], road_data['longitude'])
+                roads_data_list.append(road_data)
+
+    return roads_data_list
+
 # Streamlit App UI
 st.title("Nearby Places Analysis")
 
@@ -162,11 +191,11 @@ if st.button('Analyze'):
     st.subheader("Places Detail:")
     st.write(sorted_df)
 
-    road_data_list = get_nearby_roads(lat, lon, api_key, rad)
-    road_df = pd.DataFrame(road_data_list)
+    roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
+    roads_df = pd.DataFrame(roads_data_list)
     
-    st.subheader("Nearby Roads:")
-    st.write(road_df)
+    st.subheader("Nearby Roads from OSM:")
+    st.write(roads_df)
 
     st.subheader("Input Location Map:")
 
