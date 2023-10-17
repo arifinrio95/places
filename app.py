@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup as BS
+from math import sin, cos, sqrt, atan2, radians
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
@@ -42,6 +43,20 @@ def get_nearby_places(latitude, longitude, api_key, rad):
             total_ratings += place['rating']
     return total_places, total_ratings, total_users_rated
 
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    # Haversine formula to calculate the distance
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = 6371 * c * 1000  # Convert distance from km to meters
+
+    return distance
+
 def get_nearby_places_2(latitude, longitude, api_key, rad):
     endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     params = {
@@ -57,6 +72,9 @@ def get_nearby_places_2(latitude, longitude, api_key, rad):
         data['name'] = place['name']
         data['primary_type'] = place['types'][0]
         data['user_ratings_total'] = place.get('user_ratings_total', 0)
+        data['latitude'] = place['geometry']['location']['lat']
+        data['longitude'] = place['geometry']['location']['lng']
+        data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
         place_data_list.append(data)
     return place_data_list
 
@@ -90,9 +108,13 @@ if st.button('Analyze'):
 
     place_data_list = get_nearby_places_2(lat, lon, api_key, rad)
     place_df = pd.DataFrame(place_data_list)
-    place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({'user_ratings_total': 'sum'}).reset_index()
-    place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated']
+    place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({
+        'user_ratings_total': 'sum',
+        'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
+    }).reset_index()
+    place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (in meters)']
     sorted_df = place_df_grouped.sort_values(by='Total Users Rated', ascending=False).reset_index(drop=True)
+
 
     st.subheader("Places Detail:")
     st.write(sorted_df)
