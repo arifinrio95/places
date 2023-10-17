@@ -228,9 +228,9 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         # Get OSM road name and type using the function
         road_name_ver_OSM, road_type_ver_OSM = get_osm_details(road_info.get('location', {}).get('latitude', 0),
                                                road_info.get('location', {}).get('longitude', 0))
-        road_data['road_name'] = road_name
-        road_data['road_name_ver_OSM'] = road_name_ver_OSM
-        road_data['road_type_ver_OSM'] = road_type_ver_OSM
+        road_data['Road Name (Google)'] = road_name
+        road_data['Road Name (OSM)'] = road_name_ver_OSM
+        road_data['Road Type'] = road_type_ver_OSM
 
         road_data['latitude'] = float(road_info.get('location', {}).get('latitude', 0))
         road_data['longitude'] = float(road_info.get('location', {}).get('longitude', 0))
@@ -238,7 +238,7 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         latitude = float(latitude)
         longitude = float(longitude)
 
-        road_data['distance'] = calculate_distance(latitude, longitude, road_data['latitude'], road_data['longitude'])
+        road_data['Distance (meters)'] = calculate_distance(latitude, longitude, road_data['latitude'], road_data['longitude'])
         roads_data_list.append(road_data)
 
     return roads_data_list
@@ -251,10 +251,10 @@ def assign_intensity(road_type):
         'primary': 8,
         'secondary': 7,
         'tertiary': 6,
-        'unclassified': 5,
-        'residential': 4,
-        'service': 3,
-        'track': 2
+        'residential': 5,
+        'service': 4,
+        'track': 3,
+        'unclassified': 2
     }
     
     score = intensity_map.get(road_type, 1)
@@ -303,8 +303,8 @@ if st.button('Analyze'):
         'user_ratings_total': 'sum',
         'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
     }).reset_index()
-    place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (in meters)']
-    sorted_df = place_df_grouped.sort_values(by='Distance (in meters)', ascending=True).reset_index(drop=True)
+    place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (meters)']
+    sorted_df = place_df_grouped.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
 
 
     st.subheader("Places Detail:")
@@ -314,7 +314,7 @@ if st.button('Analyze'):
     roads_data_list = get_google_roads_nearby(lat, lon, rad, api_key)
     
     roads_df = pd.DataFrame(roads_data_list)
-    roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type_ver_OSM'].apply(assign_intensity))
+    roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
     roads_df = roads_df.drop('road_id', axis = 1)
     roads_df = roads_df.drop_duplicates()
     roads_df_sorted = roads_df.sort_values(by='distance', ascending=True).reset_index(drop=True)
