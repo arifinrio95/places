@@ -314,7 +314,7 @@ if st.button('Analyze'):
     roads_data_list = get_google_roads_nearby(lat, lon, rad, api_key)
     
     roads_df = pd.DataFrame(roads_data_list)
-    roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type'].apply(assign_intensity))
+    roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type_ver_OSM'].apply(assign_intensity))
     roads_df_sorted = roads_df.sort_values(by='distance', ascending=True).reset_index(drop=True)
     
     st.subheader("Nearby Roads :")
