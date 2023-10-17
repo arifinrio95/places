@@ -215,10 +215,8 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         road_data['latitude'] = float(road_info.get('location', {}).get('latitude', 0))
         road_data['longitude'] = float(road_info.get('location', {}).get('longitude', 0))
 
-        st.write(f"Input latitude: {latitude} - Type: {type(latitude)}")
-        st.write(f"Input longitude: {longitude} - Type: {type(longitude)}")
-        st.write(f"Road latitude: {road_data['latitude']} - Type: {type(road_data['latitude'])}")
-        st.write(f"Road longitude: {road_data['longitude']} - Type: {type(road_data['longitude'])}")
+        latitude = float(latitude)
+        longitude = float(longitude)
 
         road_data['distance'] = calculate_distance(latitude, longitude, road_data['latitude'], road_data['longitude'])
         roads_data_list.append(road_data)
