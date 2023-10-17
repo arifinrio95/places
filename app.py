@@ -91,6 +91,16 @@ def generate_circle_points(lat, lon, radius, num_points=36):
         points.append((point_lat, point_lon))
     return points
 
+def get_road_name_from_placeid(place_id, api_key):
+    endpoint_url = "https://maps.googleapis.com/maps/api/place/details/json"
+    params = {
+        'place_id': place_id,
+        'key': api_key
+    }
+    response = requests.get(endpoint_url, params=params)
+    result = response.json()
+    return result['result']['name'] if 'name' in result['result'] else "Unknown"
+
 def get_nearby_roads(latitude, longitude, api_key, rad):
     endpoint_url = "https://roads.googleapis.com/v1/nearestRoads"
     params = {
@@ -103,7 +113,8 @@ def get_nearby_roads(latitude, longitude, api_key, rad):
     road_data_list = []
     for road in result.get('snappedPoints', []):
         data = {}
-        data['road_name'] = road.get('placeId', "Unknown")  # Google Roads API tidak memberikan nama jalan secara langsung melalui nearestRoads, namun Anda dapat memanfaatkan placeId untuk mendapatkan informasi lebih lanjut jika diperlukan
+        place_id = road.get('placeId')
+        data['road_name'] = get_road_name_from_placeid(place_id, api_key)
         data['latitude'] = road['location']['latitude']
         data['longitude'] = road['location']['longitude']
         data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
