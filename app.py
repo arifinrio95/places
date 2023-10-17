@@ -122,17 +122,24 @@ def get_nearby_roads(latitude, longitude, api_key, rad):
     return road_data_list
 
 def get_osm_roads_within_radius(latitude, longitude, rad):
-    # Mengonversi radius dari meter ke derajat (sebagai perkiraan)
+    # Convert radius from meters to degrees (approximation)
     radius_in_degrees = rad / 111300
-    
+
     overpass_url = "https://overpass-api.de/api/interpreter"
     overpass_query = f"""
-    [out:json];
-    way(around:{radius_in_degrees},{latitude},{longitude})["highway"];
-    (._;>;);
-    out;
+    [out:json][timeout:25];
+    (
+      way["highway"](around:{rad},{latitude},{longitude});
+    );
+    out center;
     """
     response = requests.get(overpass_url, params={'data': overpass_query})
+    
+    # Error handling for bad response or empty data
+    if response.status_code != 200:
+        print(f"Overpass API returned status {response.status_code}: {response.text}")
+        return []
+    
     data = response.json()
 
     roads_data_list = []
