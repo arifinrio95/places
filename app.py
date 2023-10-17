@@ -26,24 +26,24 @@ def get_latlong(url):
     longitude = latlong_temp.split(',')[1]
     return lattitude, longitude
 
-def get_nearby_places(latitude, longitude, api_key):
-    endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-    params = {
-        'location': f"{latitude},{longitude}",
-        'rankby': 'distance',
-        'key': api_key
-    }
-    response = requests.get(endpoint_url, params=params)
-    result = response.json()
-    total_places = len(result['results'])
-    total_ratings = 0
-    total_users_rated = 0
-    for place in result['results']:
-        if 'user_ratings_total' in place:
-            total_users_rated += place['user_ratings_total']
-        if 'rating' in place:
-            total_ratings += place['rating']
-    return total_places, total_ratings, total_users_rated
+# def get_nearby_places(latitude, longitude, api_key):
+#     endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+#     params = {
+#         'location': f"{latitude},{longitude}",
+#         'rankby': 'distance',
+#         'key': api_key
+#     }
+#     response = requests.get(endpoint_url, params=params)
+#     result = response.json()
+#     total_places = len(result['results'])
+#     total_ratings = 0
+#     total_users_rated = 0
+#     for place in result['results']:
+#         if 'user_ratings_total' in place:
+#             total_users_rated += place['user_ratings_total']
+#         if 'rating' in place:
+#             total_ratings += place['rating']
+#     return total_places, total_ratings, total_users_rated
 
 
 
@@ -60,27 +60,68 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
     return distance
 
+# def get_nearby_places_2(latitude, longitude, api_key):
+#     endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+#     params = {
+#         'location': f"{latitude},{longitude}",
+#         # 'radius': rad,
+#         'rankby': 'distance',
+#         'key': api_key
+#     }
+#     response = requests.get(endpoint_url, params=params)
+#     result = response.json()
+#     place_data_list = []
+#     for place in result['results']:
+#         data = {}
+#         data['name'] = place['name']
+#         data['primary_type'] = place['types'][0]
+#         data['user_ratings_total'] = place.get('user_ratings_total', 0)
+#         data['latitude'] = place['geometry']['location']['lat']
+#         data['longitude'] = place['geometry']['location']['lng']
+#         data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
+#         place_data_list.append(data)
+#     return place_data_list
+
+import requests
+
 def get_nearby_places_2(latitude, longitude, api_key):
     endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-    params = {
-        'location': f"{latitude},{longitude}",
-        # 'radius': rad,
-        'rankby': 'distance',
-        'key': api_key
-    }
-    response = requests.get(endpoint_url, params=params)
-    result = response.json()
     place_data_list = []
-    for place in result['results']:
-        data = {}
-        data['name'] = place['name']
-        data['primary_type'] = place['types'][0]
-        data['user_ratings_total'] = place.get('user_ratings_total', 0)
-        data['latitude'] = place['geometry']['location']['lat']
-        data['longitude'] = place['geometry']['location']['lng']
-        data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
-        place_data_list.append(data)
+    next_page_token = None
+
+    for _ in range(3):  # 3 kali permintaan untuk mendapatkan hingga 60 hasil
+        params = {
+            'location': f"{latitude},{longitude}",
+            'rankby': 'distance',
+            'key': api_key
+        }
+        if next_page_token:  # Jika ada token halaman berikutnya, tambahkan ke parameter
+            params['pagetoken'] = next_page_token
+
+        response = requests.get(endpoint_url, params=params)
+        result = response.json()
+
+        for place in result['results']:
+            data = {}
+            data['name'] = place['name']
+            data['primary_type'] = place['types'][0]
+            data['user_ratings_total'] = place.get('user_ratings_total', 0)
+            data['latitude'] = place['geometry']['location']['lat']
+            data['longitude'] = place['geometry']['location']['lng']
+            data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
+            place_data_list.append(data)
+
+        next_page_token = result.get('next_page_token')  # Ambil token untuk halaman berikutnya
+
+        if not next_page_token:  # Jika tidak ada token untuk halaman berikutnya, berhenti
+            break
+
+        # Tunggu beberapa detik sebelum melakukan permintaan berikutnya karena ada delay antara permintaan
+        import time
+        time.sleep(2)
+
     return place_data_list
+
 
 def generate_circle_points(lat, lon, radius, num_points=36):
     """Generate points that approximate a circle on a map for a given latitude, longitude, and radius."""
@@ -281,23 +322,23 @@ api_key = st.secrets['GOOGLE_API_KEY'] # This is not secure. Consider using secr
 
 if st.button('Analyze'):
     lat, lon = get_latlong(latlong)
-    total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
+    # total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
 
     # Calculate density
-    area = 3.14 * (1**2)
-    density = total_places / area
+    # area = 3.14 * (1**2)
+    # density = total_places / area
 
     # Create DataFrame
-    data = {
-        'Total Places': [total_places],
-        # 'Total Ratings': [total_ratings],
-        'Total Users Rated': [total_users_rated],
-        'Density (places/m^2)': [density]
-    }
-    df = pd.DataFrame(data)
+    # data = {
+    #     'Total Places': [total_places],
+    #     # 'Total Ratings': [total_ratings],
+    #     'Total Users Rated': [total_users_rated],
+    #     'Density (places/m^2)': [density]
+    # }
+    # df = pd.DataFrame(data)
 
-    st.subheader("Population Density:")
-    st.write(df)
+    # st.subheader("Population Density:")
+    # st.write(df)
 
     place_data_list = get_nearby_places_2(lat, lon, api_key)
     place_df = pd.DataFrame(place_data_list)
