@@ -325,11 +325,16 @@ if st.button('Analyze'):
     st.write(roads_df_sorted)
 
     st.subheader("Effectivity Score :")
-    place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
+    # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
     place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
+    place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
     
     # 2. Hitung rata-rata UserScore dan DistanceScorePlace
-    avg_user_score = place_df_grouped['POI Reviewers'].mean()
+    sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
+    if sum_user_score <= 1000:
+        sum_user_score_norm = sum_user_score / 1000
+    else:
+        sum_user_score_norm = 1
     avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
     
     # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
@@ -337,13 +342,14 @@ if st.button('Analyze'):
     distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
     
     # 4. Hitung Effectivity Score
-    effectivity_score = (avg_user_score * avg_distance_score_place + road_intensity_score * distance_score_road) * 100
+    effectivity_score = (sum_user_score_norm + road_intensity_score * distance_score_road)/2 * 100
     
     # 5. Simpan ke DataFrame baru
     df_effectivity = pd.DataFrame({
         'Effectivity Score': [effectivity_score],
-        'Avg POI Reviewers': [avg_user_score],
+        'POI Reviewers': [sum_user_score],
         'Avg Distance POI': [avg_distance_score_place],
+        'POI Reviewers Norm Distance': [sum_user_score_norm],
         'Road Intensity Score': [road_intensity_score],
         'Road Distance': [distance_score_road]
     })
