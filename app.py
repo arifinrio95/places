@@ -6,6 +6,12 @@ from bs4 import BeautifulSoup as BS
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+local_css("style.css")
+
 def get_latlong(url):
     response = requests.get(url, headers=headers)
     soup = BS(response.text, 'html.parser')
