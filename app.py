@@ -315,6 +315,7 @@ if st.button('Analyze'):
     
     roads_df = pd.DataFrame(roads_data_list)
     roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type_ver_OSM'].apply(assign_intensity))
+    roads_df = roads_df.drop('road_id', axis = 1)
     roads_df = roads_df.drop_duplicates()
     roads_df_sorted = roads_df.sort_values(by='distance', ascending=True).reset_index(drop=True)
     
