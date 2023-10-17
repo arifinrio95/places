@@ -346,10 +346,10 @@ if st.button('Analyze'):
     # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
 
     # Generate points for circle approximation
-    # circle_points = generate_circle_points(lat_float, lon_float, rad)
+    circle_points = generate_circle_points(lat_float, lon_float, rad)
     
     # Construct circle path string
-    # circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+    circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
     
     # Incorporate circle path into the full URL
     map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
