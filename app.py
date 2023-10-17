@@ -121,51 +121,100 @@ def generate_circle_points(lat, lon, radius, num_points=36):
 #         road_data_list.append(data)
 #     return road_data_list
 
-def get_osm_roads_within_radius(latitude, longitude, rad):
-    # Convert radius from meters to degrees (approximation)
-    radius_in_degrees = rad / 111300
+# def get_osm_roads_within_radius(latitude, longitude, rad):
+#     # Convert radius from meters to degrees (approximation)
+#     radius_in_degrees = rad / 111300
 
-    overpass_url = "https://overpass-api.de/api/interpreter"
-    overpass_query = f"""
-    [out:json][timeout:25];
-    (
-      way["highway"](around:{rad},{latitude},{longitude});
-    );
-    out geom;
-    """
-    response = requests.get(overpass_url, params={'data': overpass_query})
+#     overpass_url = "https://overpass-api.de/api/interpreter"
+#     overpass_query = f"""
+#     [out:json][timeout:25];
+#     (
+#       way["highway"](around:{rad},{latitude},{longitude});
+#     );
+#     out geom;
+#     """
+#     response = requests.get(overpass_url, params={'data': overpass_query})
 
-    # Error handling for bad response or empty data
-    if response.status_code != 200:
-        print(f"Overpass API returned status {response.status_code}: {response.text}")
-        return []
+#     # Error handling for bad response or empty data
+#     if response.status_code != 200:
+#         print(f"Overpass API returned status {response.status_code}: {response.text}")
+#         return []
     
+#     data = response.json()
+
+#     road_dict = {}
+
+#     for element in data['elements']:
+#         if element['type'] == 'way':
+#             road_id = element['id']
+#             road_type = element['tags'].get('highway', 'Unknown')
+
+#             if road_id not in road_dict:
+#                 road_dict[road_id] = {
+#                     'road_id': road_id,
+#                     'road_name': element['tags'].get('name', 'Unknown'),
+#                     'road_type': road_type,
+#                     'distance': float("inf")
+#                 }
+
+#             for geometry in element.get("geometry", []):
+#                 lat, lon = geometry['lat'], geometry['lon']
+#                 distance = calculate_distance(float(latitude), float(longitude), lat, lon)
+#                 if distance < road_dict[road_id]['distance']:
+#                     road_dict[road_id]['distance'] = distance
+#                     road_dict[road_id]['latitude'] = lat
+#                     road_dict[road_id]['longitude'] = lon
+
+#     return list(road_dict.values())
+
+def get_road_details_from_place_id(place_id, api_key):
+    endpoint_url = f"https://maps.googleapis.com/maps/api/geocode/json?place_id={place_id}&key={api_key}"
+    response = requests.get(endpoint_url)
+    if response.status_code != 200:
+        return None, None
+
     data = response.json()
+    if not data['results']:
+        return None, None
 
-    road_dict = {}
+    address_components = data['results'][0]['address_components']
+    road_name = None
+    for component in address_components:
+        if "route" in component['types']:
+            road_name = component['long_name']
+            break
 
-    for element in data['elements']:
-        if element['type'] == 'way':
-            road_id = element['id']
-            road_type = element['tags'].get('highway', 'Unknown')
+    # Here, the road type is not exactly provided by Google Geocoding API, 
+    # but you can infer it from the road name or other properties.
+    # I'm setting it to 'Unknown' for this example.
+    road_type = "Unknown"
+    return road_name, road_type
 
-            if road_id not in road_dict:
-                road_dict[road_id] = {
-                    'road_id': road_id,
-                    'road_name': element['tags'].get('name', 'Unknown'),
-                    'road_type': road_type,
-                    'distance': float("inf")
-                }
+def get_google_roads_nearby(latitude, longitude, rad, api_key):
+    endpoint_url = f"https://roads.googleapis.com/v1/nearestRoads?points={latitude},{longitude}&key={api_key}"
+    response = requests.get(endpoint_url)
+    
+    if response.status_code != 200:
+        print(f"Google Maps API returned status {response.status_code}: {response.text}")
+        return []
 
-            for geometry in element.get("geometry", []):
-                lat, lon = geometry['lat'], geometry['lon']
-                distance = calculate_distance(float(latitude), float(longitude), lat, lon)
-                if distance < road_dict[road_id]['distance']:
-                    road_dict[road_id]['distance'] = distance
-                    road_dict[road_id]['latitude'] = lat
-                    road_dict[road_id]['longitude'] = lon
+    data = response.json()
+    roads_data_list = []
 
-    return list(road_dict.values())
+    for road_info in data.get('snappedPoints', []):
+        road_data = {}
+        road_data['road_id'] = road_info.get('placeId')
+        
+        road_name, road_type = get_road_details_from_place_id(road_data['road_id'], api_key)
+        road_data['road_name'] = road_name or 'Unknown'
+        road_data['road_type'] = road_type
+
+        road_data['latitude'] = road_info['location']['latitude']
+        road_data['longitude'] = road_info['location']['longitude']
+        road_data['distance'] = calculate_distance(latitude, longitude, road_data['latitude'], road_data['longitude'])
+        roads_data_list.append(road_data)
+
+    return roads_data_list
 
 # Fungsi untuk mengembalikan nilai intensitas berdasarkan jenis jalan
 def assign_intensity(road_type):
@@ -234,7 +283,9 @@ if st.button('Analyze'):
     st.subheader("Places Detail:")
     st.write(sorted_df)
 
-    roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
+    # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
+    roads_data_list = get_google_roads_nearby(lat, lon, rad, api_key)
+    
     roads_df = pd.DataFrame(roads_data_list)
     roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type'].apply(assign_intensity))
     roads_df_sorted = roads_df.sort_values(by='distance', ascending=True).reset_index(drop=True)
