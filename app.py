@@ -151,6 +151,7 @@ def get_osm_roads_within_radius(latitude, longitude, rad):
 
             if road_id not in road_dict:
                 road_dict[road_id] = {
+                    'road_id': road_id,
                     'road_name': element['tags'].get('name', 'Unknown'),
                     'road_type': road_type,
                     'distance': float("inf")
