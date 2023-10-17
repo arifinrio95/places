@@ -131,17 +131,16 @@ def get_osm_roads_within_radius(latitude, longitude, rad):
     (
       way["highway"](around:{rad},{latitude},{longitude});
     );
-    out center;
+    out geom;
     """
     response = requests.get(overpass_url, params={'data': overpass_query})
-    
+
     # Error handling for bad response or empty data
     if response.status_code != 200:
         print(f"Overpass API returned status {response.status_code}: {response.text}")
         return []
     
     data = response.json()
-
     roads_data_list = []
 
     for element in data['elements']:
@@ -149,11 +148,18 @@ def get_osm_roads_within_radius(latitude, longitude, rad):
             road_data = {}
             road_data['road_name'] = element['tags'].get('name', 'Unknown')
             road_data['road_type'] = element['tags'].get('highway', 'Unknown')
-            road_data['latitude'] = element['center']['lat'] if 'center' in element else None
-            road_data['longitude'] = element['center']['lon'] if 'center' in element else None
-            if road_data['latitude'] and road_data['longitude']:
-                road_data['distance'] = calculate_distance(float(latitude), float(longitude), road_data['latitude'], road_data['longitude'])
-                roads_data_list.append(road_data)
+
+            min_distance = float("inf")
+            for geometry in element.get("geometry", []):
+                lat, lon = geometry['lat'], geometry['lon']
+                distance = calculate_distance(float(latitude), float(longitude), lat, lon)
+                if distance < min_distance:
+                    min_distance = distance
+                    road_data['latitude'] = lat
+                    road_data['longitude'] = lon
+
+            road_data['distance'] = min_distance
+            roads_data_list.append(road_data)
 
     return roads_data_list
 
