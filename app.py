@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup as BS
 from math import sin, cos, sqrt, atan2, radians
+import pydeck as pdk
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
@@ -118,3 +119,32 @@ if st.button('Analyze'):
 
     st.subheader("Places Detail:")
     st.write(sorted_df)
+
+    st.subheader("Input Location Map:")
+
+    # Create a DataFrame for the input latitude and longitude
+    map_data = pd.DataFrame({'lat': [float(lat)], 'lon': [float(lon)]})
+
+    # Display map with circle overlay for the input radius
+    view_state = pdk.ViewState(
+        latitude=float(lat),
+        longitude=float(lon),
+        zoom=14,
+        pitch=0,
+        bearing=0
+    )
+
+    circle_layer = pdk.Layer(
+        "ScatterplotLayer",
+        map_data,
+        get_position=["lon", "lat"],
+        get_radius=rad,  # radius in meters
+        get_fill_color=[255, 0, 0, 100],
+        pickable=True,
+        stroked=True
+    )
+
+    st.pydeck_chart(pdk.Deck(
+        layers=[circle_layer],
+        initial_view_state=view_state,
+    ))
