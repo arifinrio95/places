@@ -209,14 +209,13 @@ def get_google_roads_nearby(latitude, longitude, rad, api_key):
         road_data['road_name'] = road_name or 'Unknown'
         road_data['road_type'] = road_type
 
-        road_data['latitude'] = float(road_info['location']['latitude'])
-        road_data['longitude'] = float(road_info['location']['longitude'])
+        # road_data['latitude'] = float(road_info['location']['latitude'])
+        # road_data['longitude'] = float(road_info['location']['longitude'])
 
-        # Debug print statement:
-        print(f"latitude: {latitude}, type: {type(latitude)}")
-        print(f"longitude: {longitude}, type: {type(longitude)}")
-        print(f"road_data['latitude']: {road_data['latitude']}, type: {type(road_data['latitude'])}")
-        print(f"road_data['longitude']: {road_data['longitude']}, type: {type(road_data['longitude'])}")
+        road_data['latitude'] = float(road_info.get('location', {}).get('latitude', 0))
+        road_data['longitude'] = float(road_info.get('location', {}).get('longitude', 0))
+
+
         road_data['distance'] = calculate_distance(latitude, longitude, road_data['latitude'], road_data['longitude'])
         roads_data_list.append(road_data)
 
