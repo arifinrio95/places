@@ -91,6 +91,25 @@ def generate_circle_points(lat, lon, radius, num_points=36):
         points.append((point_lat, point_lon))
     return points
 
+def get_nearby_roads(latitude, longitude, api_key, rad):
+    endpoint_url = "https://roads.googleapis.com/v1/nearestRoads"
+    params = {
+        'points': f"{latitude},{longitude}",
+        'key': api_key
+    }
+    response = requests.get(endpoint_url, params=params)
+    result = response.json()
+
+    road_data_list = []
+    for road in result.get('snappedPoints', []):
+        data = {}
+        data['road_name'] = road.get('placeId', "Unknown")  # Google Roads API tidak memberikan nama jalan secara langsung melalui nearestRoads, namun Anda dapat memanfaatkan placeId untuk mendapatkan informasi lebih lanjut jika diperlukan
+        data['latitude'] = road['location']['latitude']
+        data['longitude'] = road['location']['longitude']
+        data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
+        road_data_list.append(data)
+    return road_data_list
+
 # Streamlit App UI
 st.title("Nearby Places Analysis")
 
@@ -131,6 +150,12 @@ if st.button('Analyze'):
 
     st.subheader("Places Detail:")
     st.write(sorted_df)
+
+    road_data_list = get_nearby_roads(lat, lon, api_key, rad)
+    road_df = pd.DataFrame(road_data_list)
+    
+    st.subheader("Nearby Roads:")
+    st.write(road_df)
 
     st.subheader("Input Location Map:")
 
