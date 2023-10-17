@@ -26,11 +26,11 @@ def get_latlong(url):
     longitude = latlong_temp.split(',')[1]
     return lattitude, longitude
 
-def get_nearby_places(latitude, longitude, api_key, rad):
+def get_nearby_places(latitude, longitude, api_key):
     endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     params = {
         'location': f"{latitude},{longitude}",
-        'radius': rad,
+        'rankby': 'distance',
         'key': api_key
     }
     response = requests.get(endpoint_url, params=params)
@@ -46,6 +46,7 @@ def get_nearby_places(latitude, longitude, api_key, rad):
     return total_places, total_ratings, total_users_rated
 
 
+
 def calculate_distance(lat1, lon1, lat2, lon2):
     # Convert latitude and longitude from degrees to radians
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
@@ -59,11 +60,12 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
     return distance
 
-def get_nearby_places_2(latitude, longitude, api_key, rad):
+def get_nearby_places_2(latitude, longitude, api_key):
     endpoint_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     params = {
         'location': f"{latitude},{longitude}",
-        'radius': rad,
+        # 'radius': rad,
+        'rankby': 'distance',
         'key': api_key
     }
     response = requests.get(endpoint_url, params=params)
@@ -80,17 +82,17 @@ def get_nearby_places_2(latitude, longitude, api_key, rad):
         place_data_list.append(data)
     return place_data_list
 
-def generate_circle_points(lat, lon, radius, num_points=36):
-    """Generate points that approximate a circle on a map for a given latitude, longitude, and radius."""
-    points = []
-    for i in range(num_points):
-        angle = float(i) / num_points * (2.0 * 3.141592653589793)  # 2*Pi radians = 360 degrees
-        dx = radius * cos(angle)
-        dy = radius * sin(angle)
-        point_lat = lat + (dy / 111300)  # roughly 111.3km per degree of latitude
-        point_lon = lon + (dx / (111300 * cos(lat)))  # adjust for latitude in longitude calculation
-        points.append((point_lat, point_lon))
-    return points
+# def generate_circle_points(lat, lon, radius, num_points=36):
+#     """Generate points that approximate a circle on a map for a given latitude, longitude, and radius."""
+#     points = []
+#     for i in range(num_points):
+#         angle = float(i) / num_points * (2.0 * 3.141592653589793)  # 2*Pi radians = 360 degrees
+#         dx = radius * cos(angle)
+#         dy = radius * sin(angle)
+#         point_lat = lat + (dy / 111300)  # roughly 111.3km per degree of latitude
+#         point_lon = lon + (dx / (111300 * cos(lat)))  # adjust for latitude in longitude calculation
+#         points.append((point_lat, point_lon))
+#     return points
 
 # def get_road_name_from_placeid(place_id, api_key):
 #     endpoint_url = "https://maps.googleapis.com/maps/api/place/details/json"
@@ -209,7 +211,7 @@ def get_road_details_from_place_id(place_id, api_key):
     # road_type = "Unknown"
     return road_name
 
-def get_google_roads_nearby(latitude, longitude, rad, api_key):
+def get_google_roads_nearby(latitude, longitude, api_key):
     endpoint_url = f"https://roads.googleapis.com/v1/nearestRoads?points={latitude},{longitude}&key={api_key}"
     response = requests.get(endpoint_url)
     
@@ -273,13 +275,13 @@ def assign_intensity(road_type):
 st.title("Nearby Places Analysis")
 
 # Taking inputs
-rad = st.number_input("Input Radius (in meters)", min_value=10, value=200)
+# rad = st.number_input("Input Radius (in meters)", min_value=10, value=200)
 latlong = st.text_input("Input location link", "")
 api_key = st.secrets['GOOGLE_API_KEY'] # This is not secure. Consider using secrets management or Streamlit Secrets
 
 if st.button('Analyze'):
     lat, lon = get_latlong(latlong)
-    total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key, rad)
+    total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
 
     # Calculate density
     area = 3.14 * (1**2)
@@ -297,7 +299,7 @@ if st.button('Analyze'):
     st.subheader("Population Density:")
     st.write(df)
 
-    place_data_list = get_nearby_places_2(lat, lon, api_key, rad)
+    place_data_list = get_nearby_places_2(lat, lon, api_key)
     place_df = pd.DataFrame(place_data_list)
     place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({
         'user_ratings_total': 'sum',
@@ -311,7 +313,7 @@ if st.button('Analyze'):
     st.write(sorted_df)
 
     # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
-    roads_data_list = get_google_roads_nearby(lat, lon, rad, api_key)
+    roads_data_list = get_google_roads_nearby(lat, lon, api_key)
     
     roads_df = pd.DataFrame(roads_data_list)
     roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
@@ -337,16 +339,17 @@ if st.button('Analyze'):
     size = "600x300"
     maptype = "roadmap"
     marker = f"color:red|label:C|{lat_float},{lon_float}"
+    rad = 200
     path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
 
     # # Constructing the full URL
     # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
 
     # Generate points for circle approximation
-    circle_points = generate_circle_points(lat_float, lon_float, rad)
+    # circle_points = generate_circle_points(lat_float, lon_float, rad)
     
     # Construct circle path string
-    circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+    # circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
     
     # Incorporate circle path into the full URL
     map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
