@@ -91,35 +91,35 @@ def generate_circle_points(lat, lon, radius, num_points=36):
         points.append((point_lat, point_lon))
     return points
 
-def get_road_name_from_placeid(place_id, api_key):
-    endpoint_url = "https://maps.googleapis.com/maps/api/place/details/json"
-    params = {
-        'place_id': place_id,
-        'key': api_key
-    }
-    response = requests.get(endpoint_url, params=params)
-    result = response.json()
-    return result['result']['name'] if 'name' in result['result'] else "Unknown"
+# def get_road_name_from_placeid(place_id, api_key):
+#     endpoint_url = "https://maps.googleapis.com/maps/api/place/details/json"
+#     params = {
+#         'place_id': place_id,
+#         'key': api_key
+#     }
+#     response = requests.get(endpoint_url, params=params)
+#     result = response.json()
+#     return result['result']['name'] if 'name' in result['result'] else "Unknown"
 
-def get_nearby_roads(latitude, longitude, api_key, rad):
-    endpoint_url = "https://roads.googleapis.com/v1/nearestRoads"
-    params = {
-        'points': f"{latitude},{longitude}",
-        'key': api_key
-    }
-    response = requests.get(endpoint_url, params=params)
-    result = response.json()
+# def get_nearby_roads(latitude, longitude, api_key, rad):
+#     endpoint_url = "https://roads.googleapis.com/v1/nearestRoads"
+#     params = {
+#         'points': f"{latitude},{longitude}",
+#         'key': api_key
+#     }
+#     response = requests.get(endpoint_url, params=params)
+#     result = response.json()
 
-    road_data_list = []
-    for road in result.get('snappedPoints', []):
-        data = {}
-        place_id = road.get('placeId')
-        data['road_name'] = get_road_name_from_placeid(place_id, api_key)
-        data['latitude'] = road['location']['latitude']
-        data['longitude'] = road['location']['longitude']
-        data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
-        road_data_list.append(data)
-    return road_data_list
+#     road_data_list = []
+#     for road in result.get('snappedPoints', []):
+#         data = {}
+#         place_id = road.get('placeId')
+#         data['road_name'] = get_road_name_from_placeid(place_id, api_key)
+#         data['latitude'] = road['location']['latitude']
+#         data['longitude'] = road['location']['longitude']
+#         data['distance'] = calculate_distance(float(latitude), float(longitude), data['latitude'], data['longitude'])
+#         road_data_list.append(data)
+#     return road_data_list
 
 def get_osm_roads_within_radius(latitude, longitude, rad):
     # Convert radius from meters to degrees (approximation)
@@ -170,8 +170,18 @@ def assign_intensity(road_type):
         'service': 3,
         'track': 2
     }
-    # Jika road_type ada dalam intensity_map, kembalikan nilai intensitasnya, jika tidak kembalikan 1
-    return intensity_map.get(road_type, 1)
+    
+    score = intensity_map.get(road_type, 1)
+    
+    # Penentuan label berdasarkan skor
+    if score >= 7:
+        label = "tinggi"
+    elif score >= 4:
+        label = "sedang"
+    else:
+        label = "rendah"
+    
+    return label, score
 
 # Streamlit App UI
 st.title("Nearby Places Analysis")
@@ -216,9 +226,9 @@ if st.button('Analyze'):
 
     roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
     roads_df = pd.DataFrame(roads_data_list)
-    roads_df['intensitas'] = roads_df['road_type'].apply(assign_intensity)
+    roads_df['intensitas'], roads_df['intensitas_score'] = zip(*roads_df['road_type'].apply(assign_intensity))
     
-    st.subheader("Nearby Roads from OSM:")
+    st.subheader("Nearby Roads :")
     st.write(roads_df)
 
     st.subheader("Input Location Map:")
