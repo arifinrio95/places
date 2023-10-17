@@ -151,7 +151,6 @@ def get_osm_roads_within_radius(latitude, longitude, rad):
             road_data['road_type'] = element['tags'].get('highway', 'Unknown')
             road_data['latitude'] = element['center']['lat'] if 'center' in element else None
             road_data['longitude'] = element['center']['lon'] if 'center' in element else None
-            roads_df['intensitas'] = roads_df['road_type'].apply(assign_intensity)
             if road_data['latitude'] and road_data['longitude']:
                 road_data['distance'] = calculate_distance(float(latitude), float(longitude), road_data['latitude'], road_data['longitude'])
                 roads_data_list.append(road_data)
@@ -217,6 +216,7 @@ if st.button('Analyze'):
 
     roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
     roads_df = pd.DataFrame(roads_data_list)
+    roads_df['intensitas'] = roads_df['road_type'].apply(assign_intensity)
     
     st.subheader("Nearby Roads from OSM:")
     st.write(roads_df)
