@@ -434,9 +434,6 @@ if input_method == "Input location link":
         
         # Incorporate circle path into the full URL
         map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
-        
-        # Display the map in Streamlit
-        st.image(map_url)
 
         # Display the map in Streamlit
         st.image(map_url)
