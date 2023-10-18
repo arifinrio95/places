@@ -453,7 +453,7 @@ if input_method == "Input location link":
             #     poi_density = 1
             if poi_density >= 1000:
                 poi_density_norm = 0
-            else:
+            if poi_density < 1000:
                 poi_density_norm = 1-poi_density/1000
             
             # 5. Hitung Effectivity Score
