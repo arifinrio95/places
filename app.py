@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup as BS
 from math import sin, cos, sqrt, atan2, radians
 import pydeck as pdk
 import overpy
+import cv2
+import numpy as np
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
@@ -313,6 +315,44 @@ def assign_intensity(road_type):
     
     return label, score
 
+# Fungsi untuk mendeteksi kendaraan dalam gambar
+def detect_vehicles(img, net, output_layers):
+    height, width, _ = img.shape
+    blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+    net.setInput(blob)
+    outs = net.forward(output_layers)
+    
+    class_ids = []
+    confidences = []
+    boxes = []
+    
+    for out in outs:
+        for detection in out:
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+            if confidence > 0.5: # Anda dapat menyesuaikan ambang batas ini
+                center_x = int(detection[0] * width)
+                center_y = int(detection[1] * height)
+                w = int(detection[2] * width)
+                h = int(detection[3] * height)
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
+                boxes.append([x, y, w, h])
+                confidences.append(float(confidence))
+                class_ids.append(class_id)
+                
+    # Gunakan Non Maximum Suppression
+    indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+    vehicle_count = 0
+    for i in range(len(boxes)):
+        if i in indexes:
+            label = str(classes[class_ids[i]])
+            if label in ['car', 'truck', 'bus', 'motorcycle']: # Anda dapat menambahkan lebih banyak kategori kendaraan jika perlu
+                vehicle_count += 1
+                
+    return vehicle_count
+
 # Streamlit App UI
 st.title("Spot Score Analyzer")
 
@@ -447,25 +487,52 @@ if input_method == "Input location link":
                 # Display the map in Streamlit
                 st.image(map_url)
         
-                # Display the map in Streamlit
-                st.write("Street Views")
-                # Build the Google Street View Static API URL for different directions
-                street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
-                street_view_size = "600x300"
+                # # Display the map in Streamlit
+                # st.write("Street Views")
+                # # Build the Google Street View Static API URL for different directions
+                # street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+                # street_view_size = "600x300"
                 
-                directions = {
-                    "North": 0,
-                    "East": 90,
-                    "South": 180,
-                    "West": 270
-                }
+                # directions = {
+                #     "North": 0,
+                #     "East": 90,
+                #     "South": 180,
+                #     "West": 270
+                # }
                 
-                # Fetch and display Street View images for each direction
+                # # Fetch and display Street View images for each direction
+                # for direction_name, heading_value in directions.items():
+                #     street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                    
+                #     # Display the Street View image in Streamlit
+                #     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+
+                # Load YOLO
+                net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg") # Ganti dengan path Anda
+                layer_names = net.getLayerNames()
+                output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+                classes = ["car", "bus", "truck", "motorcycle"] # Anda dapat menyesuaikan ini berdasarkan classes di file .names Anda
+                
+                # Loop melalui gambar Street View
+                total_vehicles = 0
                 for direction_name, heading_value in directions.items():
                     street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
                     
-                    # Display the Street View image in Streamlit
-                    st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+                    # Unduh gambar dari URL
+                    response = requests.get(street_view_url, stream=True)
+                    response.raise_for_status()
+                    image = np.asarray(bytearray(response.content), dtype="uint8")
+                    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+                    
+                    # Hitung jumlah kendaraan dalam gambar
+                    vehicle_count = detect_vehicles(image, net, output_layers)
+                    total_vehicles += vehicle_count
+                    
+                    # Tampilkan gambar dengan jumlah kendaraan
+                    caption = f"Street View ({direction_name}) - Vehicles Detected: {vehicle_count}"
+                    st.image(image, caption=caption, channels="BGR", use_column_width=True)
+                
+                st.write(f"Total Vehicles Detected: {total_vehicles}")
 
             except:
                 st.write("There is no road nearby, please submit another coordinate.")
