@@ -452,16 +452,16 @@ if input_method == "Input location link":
                 # if poi_density <= 100:
                 #     poi_density = 1
                 if poi_density >= 1000:
-                    poi_density = 0
+                    poi_density_norm = 0
                 else:
-                    poi_density = 1-poi_density/1000
+                    poi_density_norm = 1-poi_density/1000
                 
                 # 5. Hitung Effectivity Score
                 # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
-                poi_weight = 0.4
-                poi_dense_weight = 0.3
+                poi_weight = 0.5
+                poi_dense_weight = 0.2
                 road_weight = 0.3
-                effectivity_score = (poi_weight*sum_user_score_norm + poi_dense_weight*poi_density + road_weight*(road_intensity_score * distance_score_road)) * 100
+                effectivity_score = (poi_weight*sum_user_score_norm + poi_dense_weight*poi_density_norm + road_weight*(road_intensity_score * distance_score_road)) * 100
                 # if road_intensity_score < 0.8:
                 #     poi_weight = 0.7
                 #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
