@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup as BS
 from math import sin, cos, sqrt, atan2, radians
 import pydeck as pdk
 import overpy
-from streamlit_googlemaps import st_googlemap
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
