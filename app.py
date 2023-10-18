@@ -9,6 +9,20 @@ import overpy
 import cv2
 import numpy as np
 
+from google.cloud import vision
+from google.cloud.vision import types
+
+# Inisialisasi klien Vision API
+from google.oauth2.credentials import Credentials
+import google.auth.transport.requests
+
+# Membuat kredensial dari string JSON
+creds = Credentials.from_authorized_user_info(st.secrets["GOOGLE_API_KEY"])
+transport = google.auth.transport.requests.Request()
+creds.refresh(transport)
+
+client = vision.ImageAnnotatorClient(credentials=creds)
+
 headers = {'User-agent': 'Mozilla/5.0'}
 
 def local_css(file_name):
@@ -507,32 +521,43 @@ if input_method == "Input location link":
             #     # Display the Street View image in Streamlit
             #     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
 
-            # Load YOLO
-            net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg") # Ganti dengan path Anda
-            layer_names = net.getLayerNames()
-            output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-            classes = ["car", "bus", "truck", "motorcycle"] # Anda dapat menyesuaikan ini berdasarkan classes di file .names Anda
+            # Display the map in Streamlit
+            st.write("Street Views")
+            # Build the Google Street View Static API URL for different directions
+            street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+            street_view_size = "600x300"
             
-            # Loop melalui gambar Street View
+            directions = {
+                "North": 0,
+                "East": 90,
+                "South": 180,
+                "West": 270
+            }
+            
             total_vehicles = 0
+            
+            # Fetch and display Street View images for each direction
             for direction_name, heading_value in directions.items():
                 street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
                 
-                # Unduh gambar dari URL
-                response = requests.get(street_view_url, stream=True)
-                response.raise_for_status()
-                image = np.asarray(bytearray(response.content), dtype="uint8")
-                image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+                # Ambil gambar dari URL
+                response = requests.get(street_view_url)
+                image = response.content
                 
-                # Hitung jumlah kendaraan dalam gambar
-                vehicle_count = detect_vehicles(image, net, output_layers)
-                total_vehicles += vehicle_count
-                
-                # Tampilkan gambar dengan jumlah kendaraan
-                caption = f"Street View ({direction_name}) - Vehicles Detected: {vehicle_count}"
-                st.image(image, caption=caption, channels="BGR", use_column_width=True)
+                # Kirim gambar ke Google Vision API
+                image = vision.Image(content=image)
+                response = client.object_localization(image=image)
+                objects = response.localized_object_annotations
             
-            st.write(f"Total Vehicles Detected: {total_vehicles}")
+                # Hitung kendaraan
+                vehicles = ['car', 'truck', 'bus', 'motorcycle', 'bicycle']
+                vehicle_count = sum(1 for obj in objects if obj.name.lower() in vehicles)
+                total_vehicles += vehicle_count
+            
+                caption = f"Street View ({direction_name}) - Vehicles detected: {vehicle_count}"
+                st.image(street_view_url, caption=caption, use_column_width=True)
+            
+            st.write(f"Total vehicles detected in all images: {total_vehicles}")
 
             # except:
             #     st.write("There is no road nearby, please submit another coordinate.")
