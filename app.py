@@ -447,24 +447,37 @@ if input_method == "Input location link":
                 # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
                 road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
                 distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
+
+                # 4. Hitung POI Density Score
+                # if poi_density <= 100:
+                #     poi_density = 1
+                if poi_density >= 1000
+                    poi_density = 0
+                else:
+                    poi_density = 1-poi_density/1000
                 
-                # 4. Hitung Effectivity Score
+                # 5. Hitung Effectivity Score
                 # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
-                if road_intensity_score < 0.8:
-                    poi_weight = 0.7
-                    effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
-                if road_intensity_score >= 0.8:
-                    poi_weight = 0.3
-                    effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+                poi_weight = 0.35
+                poi_dense_weight = 0.35
+                road_weight = 0.3
+                effectivity_score = (poi_weight*sum_user_score_norm + poi_dense_weight*poi_density + road_weight*(road_intensity_score * distance_score_road)) * 100
+                # if road_intensity_score < 0.8:
+                #     poi_weight = 0.7
+                #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+                # if road_intensity_score >= 0.8:
+                #     poi_weight = 0.3
+                #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
                 
                 # 5. Simpan ke DataFrame baru
                 df_effectivity = pd.DataFrame({
                     'Effectivity Score': [effectivity_score],
                     'POI Reviewers': [sum_user_score],
-                    'Avg Distance POI': [avg_distance_score_place],
-                    'POI Reviewers Norm Distance': [sum_user_score_norm],
+                    # 'Avg Distance POI': [avg_distance_score_place],
+                    'POI Density (m2/POI)': [poi_density]
+                    # 'POI Reviewers Norm Distance': [sum_user_s÷core_norm],
                     'Road Intensity Score': [road_intensity_score],
-                    'Road Distance': [distance_score_road]
+                    # 'Road Distance': [distance_score_road]
                 })
         
                 formatted_score = "{:.2f}%".format(effectivity_score)
