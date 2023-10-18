@@ -434,7 +434,7 @@ if input_method == "Input location link":
         # Display the map in Streamlit
         st.image(map_url)
 
-if input_method == "Select from map":
+if input_method == "Select from map (Soon)":
     st.write("Coming Soon...")
     # location = st_googlemap()
     # if location:
