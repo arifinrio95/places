@@ -14,7 +14,9 @@ from google.oauth2.credentials import Credentials
 from google.cloud import vision
 
 # Memuat kredensial dari secrets.toml
-creds_info = json.loads(st.secrets["google"]["credentials"])
+# creds_info = json.loads(st.secrets["google"]["credentials"])
+creds_info = st.secrets["google"]["credentials"]
+
 
 # Menggunakan kredensial untuk membuat objek Credentials
 creds = Credentials.from_service_account_info(creds_info)
