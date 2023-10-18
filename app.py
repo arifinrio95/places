@@ -437,7 +437,9 @@ if input_method == "Input location link":
 
         # Display the map in Streamlit
         st.image(map_url)
-        
+
+        # Display the map in Streamlit
+        st.write("Street Views")
         # Build the Google Street View Static API URL for different directions
         street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
         street_view_size = "600x300"
