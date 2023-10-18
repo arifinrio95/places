@@ -317,7 +317,7 @@ def assign_intensity(road_type):
 st.title("Nearby Places Analysis")
 
 # Memberikan pilihan kepada pengguna
-input_method = st.radio("Choose input method:", [" ", "Input location link", "Select from map"])
+input_method = st.radio("Choose input method:", ["Input location link", "Select from map (Soon)"])
 
 if input_method == "Input location link":
     # Taking inputs
@@ -436,114 +436,115 @@ if input_method == "Input location link":
         st.image(map_url)
 
 if input_method == "Select from map":
-    location = st_googlemap()
-    if location:
-        lat, lon = location['lat'], location['lng']
+    st.write("Coming Soon...")
+    # location = st_googlemap()
+    # if location:
+    #     lat, lon = location['lat'], location['lng']
 
-        # total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
+    #     # total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
 
-        # Calculate density
-        # area = 3.14 * (1**2)
-        # density = total_places / area
+    #     # Calculate density
+    #     # area = 3.14 * (1**2)
+    #     # density = total_places / area
     
-        # Create DataFrame
-        # data = {
-        #     'Total Places': [total_places],
-        #     # 'Total Ratings': [total_ratings],
-        #     'Total Users Rated': [total_users_rated],
-        #     'Density (places/m^2)': [density]
-        # }
-        # df = pd.DataFrame(data)
+    #     # Create DataFrame
+    #     # data = {
+    #     #     'Total Places': [total_places],
+    #     #     # 'Total Ratings': [total_ratings],
+    #     #     'Total Users Rated': [total_users_rated],
+    #     #     'Density (places/m^2)': [density]
+    #     # }
+    #     # df = pd.DataFrame(data)
     
-        # st.subheader("Population Density:")
-        # st.write(df)
+    #     # st.subheader("Population Density:")
+    #     # st.write(df)
     
-        place_data_list = get_nearby_places_2(lat, lon, api_key)
-        place_df = pd.DataFrame(place_data_list)
-        place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({
-            'user_ratings_total': 'sum',
-            'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
-        }).reset_index()
-        place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (meters)']
-        sorted_df = place_df_grouped.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
+    #     place_data_list = get_nearby_places_2(lat, lon, api_key)
+    #     place_df = pd.DataFrame(place_data_list)
+    #     place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({
+    #         'user_ratings_total': 'sum',
+    #         'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
+    #     }).reset_index()
+    #     place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (meters)']
+    #     sorted_df = place_df_grouped.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
     
     
-        st.subheader("Places Detail:")
-        st.write(sorted_df)
+    #     st.subheader("Places Detail:")
+    #     st.write(sorted_df)
     
-        # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
-        roads_data_list = get_google_roads_nearby(lat, lon, api_key)
+    #     # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
+    #     roads_data_list = get_google_roads_nearby(lat, lon, api_key)
         
-        roads_df = pd.DataFrame(roads_data_list)
-        roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
-        roads_df = roads_df.drop('road_id', axis = 1)
-        roads_df = roads_df.drop_duplicates()
-        roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
+    #     roads_df = pd.DataFrame(roads_data_list)
+    #     roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
+    #     roads_df = roads_df.drop('road_id', axis = 1)
+    #     roads_df = roads_df.drop_duplicates()
+    #     roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
         
-        st.subheader("Nearby Roads :")
-        st.write(roads_df_sorted)
+    #     st.subheader("Nearby Roads :")
+    #     st.write(roads_df_sorted)
     
-        st.subheader("Effectivity Score :")
-        # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
-        place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
-        place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
+    #     st.subheader("Effectivity Score :")
+    #     # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
+    #     place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
+    #     place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
         
-        # 2. Hitung rata-rata UserScore dan DistanceScorePlace
-        sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
-        if sum_user_score <= 1000:
-            sum_user_score_norm = sum_user_score / 1000
-        else:
-            sum_user_score_norm = 1
-        avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
+    #     # 2. Hitung rata-rata UserScore dan DistanceScorePlace
+    #     sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
+    #     if sum_user_score <= 1000:
+    #         sum_user_score_norm = sum_user_score / 1000
+    #     else:
+    #         sum_user_score_norm = 1
+    #     avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
         
-        # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
-        road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
-        distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
+    #     # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
+    #     road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
+    #     distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
         
-        # 4. Hitung Effectivity Score
-        effectivity_score = (sum_user_score_norm + road_intensity_score * distance_score_road)/2 * 100
+    #     # 4. Hitung Effectivity Score
+    #     effectivity_score = (sum_user_score_norm + road_intensity_score * distance_score_road)/2 * 100
         
-        # 5. Simpan ke DataFrame baru
-        df_effectivity = pd.DataFrame({
-            'Effectivity Score': [effectivity_score],
-            'POI Reviewers': [sum_user_score],
-            'Avg Distance POI': [avg_distance_score_place],
-            'POI Reviewers Norm Distance': [sum_user_score_norm],
-            'Road Intensity Score': [road_intensity_score],
-            'Road Distance': [distance_score_road]
-        })
+    #     # 5. Simpan ke DataFrame baru
+    #     df_effectivity = pd.DataFrame({
+    #         'Effectivity Score': [effectivity_score],
+    #         'POI Reviewers': [sum_user_score],
+    #         'Avg Distance POI': [avg_distance_score_place],
+    #         'POI Reviewers Norm Distance': [sum_user_score_norm],
+    #         'Road Intensity Score': [road_intensity_score],
+    #         'Road Distance': [distance_score_road]
+    #     })
         
-        st.write(df_effectivity)
+    #     st.write(df_effectivity)
     
-        st.subheader("Input Location Map:")
+    #     st.subheader("Input Location Map:")
     
-        # Convert lat and lon to float for arithmetic operations
-        lat_float = float(lat)
-        lon_float = float(lon)
+    #     # Convert lat and lon to float for arithmetic operations
+    #     lat_float = float(lat)
+    #     lon_float = float(lon)
     
-        # Build the Google Maps Static API URL
-        base_url = "https://maps.googleapis.com/maps/api/staticmap?"
+    #     # Build the Google Maps Static API URL
+    #     base_url = "https://maps.googleapis.com/maps/api/staticmap?"
     
-        # Parameters
-        center = f"{lat_float},{lon_float}"
-        zoom = "18"
-        size = "600x300"
-        maptype = "roadmap"
-        marker = f"color:red|label:C|{lat_float},{lon_float}"
-        rad = 200
-        path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
+    #     # Parameters
+    #     center = f"{lat_float},{lon_float}"
+    #     zoom = "18"
+    #     size = "600x300"
+    #     maptype = "roadmap"
+    #     marker = f"color:red|label:C|{lat_float},{lon_float}"
+    #     rad = 200
+    #     path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
     
-        # # Constructing the full URL
-        # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
+    #     # # Constructing the full URL
+    #     # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
     
-        # Generate points for circle approximation
-        circle_points = generate_circle_points(lat_float, lon_float, rad)
+    #     # Generate points for circle approximation
+    #     circle_points = generate_circle_points(lat_float, lon_float, rad)
         
-        # Construct circle path string
-        circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+    #     # Construct circle path string
+    #     circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
         
-        # Incorporate circle path into the full URL
-        map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
+    #     # Incorporate circle path into the full URL
+    #     map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
         
-        # Display the map in Streamlit
-        st.image(map_url)
+    #     # Display the map in Streamlit
+    #     st.image(map_url)
