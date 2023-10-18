@@ -314,7 +314,7 @@ def assign_intensity(road_type):
     return label, score
 
 # Streamlit App UI
-st.title("Nearby Places Analysis")
+st.title("Spot Score Analyzer")
 
 # Memberikan pilihan kepada pengguna
 input_method = st.radio("Choose input method:", ["Input location link", "Select from map (Soon)"])
