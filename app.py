@@ -462,7 +462,7 @@ if input_method == "Input location link":
                     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
 
             except:
-                st.write("There is no road nearby, please submit another coordinate.)
+                st.write("There is no road nearby, please submit another coordinate.")
 
 if input_method == "Select from map (Soon)":
     st.write("Coming Soon...")
