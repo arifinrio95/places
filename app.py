@@ -396,7 +396,7 @@ if input_method == "Input location link":
                     poi_weight = 0.7
                     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
                 else:
-                    poi_weight = 0.5
+                    poi_weight = 0.3
                     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
                 
                 # 5. Simpan ke DataFrame baru
