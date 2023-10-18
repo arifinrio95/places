@@ -482,12 +482,12 @@ if input_method == "Input location link":
                     poi_density_class = 'Normal Density POI'
                 if poi_density_norm >= 0.66:
                     poi_density_class = 'High Density POI'
-                if road_intensity_score <= 5:
-                    road_intensity_class = 'Local Roads'
-                if road_intensity_score >= 6 and road_intensity_score <= 7:
-                    road_intensity_class = 'Arterial Roads'
-                if road_intensity_score >= 8:
-                    road_intensity_class = 'Main Roads/Highways'
+                # if road_intensity_score <= 5:
+                #     road_intensity_class = 'Local Roads'
+                # if road_intensity_score >= 6 and road_intensity_score <= 7:
+                #     road_intensity_class = 'Arterial Roads'
+                # if road_intensity_score >= 8:
+                #     road_intensity_class = 'Main Roads/Highways'
 
                 
                 # 6. Simpan ke DataFrame baru
@@ -500,7 +500,7 @@ if input_method == "Input location link":
                     'POI Density Class': [poi_density_class],
                     # 'POI Reviewers Norm Distance': [sum_user_s÷core_norm],
                     'Road Intensity Score': [road_intensity_score],
-                    'Road Intensity Class': [road_intensity_class]
+                    'Road Type': [roads_df['Road Type'].iloc[0].capitalize()]
                     # 'Road Distance': [distance_score_road]
                 })
         
