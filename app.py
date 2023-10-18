@@ -468,15 +468,39 @@ if input_method == "Input location link":
                 # if road_intensity_score >= 0.8:
                 #     poi_weight = 0.3
                 #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+
+                # 5. Segment Score
+                if sum_user_score_norm < 0.33:
+                    poi_quality = 'Low Quality POI'
+                if sum_user_score_norm >= 0.33 and sum_user_score_norm < 0.66:
+                    poi_quality = 'Standard Quality POI'
+                if sum_user_score_norm >= 0.66:
+                    poi_quality = 'High Quality POI'
+                if poi_density_norm < 0.33:
+                    poi_density_class = 'Low Density POI'
+                if poi_density_norm >= 0.33 and sum_user_score_norm < 0.66:
+                    poi_density_class = 'Normal Density POI'
+                if poi_density_norm >= 0.66:
+                    poi_density_class = 'High Density POI'
+                if road_intensity_score <= 5:
+                    road_intensity_class = 'Local Roads'
+                if road_intensity_score >= 6 and road_intensity_score <= 7:
+                    road_intensity_class = 'Arterial Roads'
+                if road_intensity_score >= 8:
+                    road_intensity_class = 'Main Roads/Highways'
+
                 
-                # 5. Simpan ke DataFrame baru
+                # 6. Simpan ke DataFrame baru
                 df_effectivity = pd.DataFrame({
                     'Effectivity Score': [effectivity_score],
                     'POI Reviewers': [sum_user_score],
+                    'POI Quality': [poi_quality],
                     # 'Avg Distance POI': [avg_distance_score_place],
                     'POI Density (m2/POI)': [poi_density],
+                    'POI Density Class': [poi_density_class],
                     # 'POI Reviewers Norm Distance': [sum_user_s÷core_norm],
-                    'Road Intensity Score': [road_intensity_score]
+                    'Road Intensity Score': [road_intensity_score],
+                    'Road Intensity Class': [road_intensity_class]
                     # 'Road Distance': [distance_score_road]
                 })
         
