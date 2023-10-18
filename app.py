@@ -363,6 +363,8 @@ if input_method == "Input location link":
             roads_data_list = get_google_roads_nearby(lat, lon, api_key)
             
             roads_df = pd.DataFrame(roads_data_list)
+            st.write("Sorry maintenance...")
+            st.write(roads_df)
             try:
                 roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
             except:
