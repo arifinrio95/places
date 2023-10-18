@@ -9,17 +9,17 @@ import overpy
 # import cv2
 import numpy as np
 
-import json
-from google.cloud import vision
-from google.oauth2.service_account import Credentials
+# import json
+# from google.cloud import vision
+# from google.oauth2.service_account import Credentials
 
-# Memuat kredensial dari secrets.toml
-creds_info = json.loads(st.secrets["google"]["credentials"])
-st.write(type(creds_info))
-# creds_info = st.secrets["google"]["credentials"]
+# # Memuat kredensial dari secrets.toml
+# creds_info = json.loads(st.secrets["google"]["credentials"])
+# st.write(type(creds_info))
+# # creds_info = st.secrets["google"]["credentials"]
 
-creds = Credentials.from_service_account_info(creds_info)
-client = vision.ImageAnnotatorClient(credentials=creds)
+# creds = Credentials.from_service_account_info(creds_info)
+# client = vision.ImageAnnotatorClient(credentials=creds)
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
@@ -415,144 +415,144 @@ if input_method == "Input location link":
             roads_data_list = get_google_roads_nearby(lat, lon, api_key)
             
             roads_df = pd.DataFrame(roads_data_list)
-            # try:
-            roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
-            roads_df = roads_df.drop('road_id', axis = 1)
-            roads_df = roads_df.drop_duplicates()
-            roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
-            
-            st.subheader("Nearby Roads :")
-            st.write(roads_df_sorted)
-        
-            st.subheader("Effectivity Score :")
-            
-            # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
-            place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
-            place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
-            
-            # 2. Hitung rata-rata UserScore dan DistanceScorePlace
-            sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
-            if sum_user_score <= 1000:
-                sum_user_score_norm = sum_user_score / 1000
-            else:
-                sum_user_score_norm = 1
-            avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
-            
-            # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
-            road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
-            distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
-            
-            # 4. Hitung Effectivity Score
-            # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
-            if road_intensity_score < 0.8:
-                poi_weight = 0.7
-                effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
-            if road_intensity_score >= 0.8:
-                poi_weight = 0.3
-                effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
-            
-            # 5. Simpan ke DataFrame baru
-            df_effectivity = pd.DataFrame({
-                'Effectivity Score': [effectivity_score],
-                'POI Reviewers': [sum_user_score],
-                'Avg Distance POI': [avg_distance_score_place],
-                'POI Reviewers Norm Distance': [sum_user_score_norm],
-                'Road Intensity Score': [road_intensity_score],
-                'Road Distance': [distance_score_road]
-            })
-    
-            formatted_score = "{:.2f}%".format(effectivity_score)
-            st.markdown(f"<span style='font-size: 32px; color: red;'>{formatted_score}</span>", unsafe_allow_html=True)
-            # st.write("")
-            st.write(df_effectivity)
-        
-            st.subheader("Input Location Map:")
-        
-            # Convert lat and lon to float for arithmetic operations
-            lat_float = float(lat)
-            lon_float = float(lon)
-        
-            # Build the Google Maps Static API URL
-            base_url = "https://maps.googleapis.com/maps/api/staticmap?"
-        
-            # Parameters
-            center = f"{lat_float},{lon_float}"
-            zoom = "18"
-            size = "600x300"
-            maptype = "roadmap"
-            marker = f"color:red|label:C|{lat_float},{lon_float}"
-            rad = 200
-            path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
-        
-            # # Constructing the full URL
-            # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
-        
-            # Generate points for circle approximation
-            circle_points = generate_circle_points(lat_float, lon_float, rad)
-            
-            # Construct circle path string
-            circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
-            
-            # Incorporate circle path into the full URL
-            map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
-    
-            # Display the map in Streamlit
-            st.image(map_url)
-    
-            # # Display the map in Streamlit
-            # st.write("Street Views")
-            # # Build the Google Street View Static API URL for different directions
-            # street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
-            # street_view_size = "600x300"
-            
-            # directions = {
-            #     "North": 0,
-            #     "East": 90,
-            #     "South": 180,
-            #     "West": 270
-            # }
-            
-            # # Fetch and display Street View images for each direction
-            # for direction_name, heading_value in directions.items():
-            #     street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+            try:
+                roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
+                roads_df = roads_df.drop('road_id', axis = 1)
+                roads_df = roads_df.drop_duplicates()
+                roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
                 
-            #     # Display the Street View image in Streamlit
-            #     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
-
-            # Display the map in Streamlit
-            st.write("Street Views")
-            # Build the Google Street View Static API URL for different directions
-            street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
-            street_view_size = "600x300"
+                st.subheader("Nearby Roads :")
+                st.write(roads_df_sorted)
             
-            directions = {
-                "North": 0,
-                "East": 90,
-                "South": 180,
-                "West": 270
-            }
-            
-            total_vehicles = 0
-            
-            # Fetch and display Street View images for each direction
-            for direction_name, heading_value in directions.items():
-                street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                st.subheader("Effectivity Score :")
                 
-                # Display the Street View image in Streamlit
-                st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+                # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
+                place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
+                place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
+                
+                # 2. Hitung rata-rata UserScore dan DistanceScorePlace
+                sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
+                if sum_user_score <= 1000:
+                    sum_user_score_norm = sum_user_score / 1000
+                else:
+                    sum_user_score_norm = 1
+                avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
+                
+                # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
+                road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
+                distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
+                
+                # 4. Hitung Effectivity Score
+                # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
+                if road_intensity_score < 0.8:
+                    poi_weight = 0.7
+                    effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+                if road_intensity_score >= 0.8:
+                    poi_weight = 0.3
+                    effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+                
+                # 5. Simpan ke DataFrame baru
+                df_effectivity = pd.DataFrame({
+                    'Effectivity Score': [effectivity_score],
+                    'POI Reviewers': [sum_user_score],
+                    'Avg Distance POI': [avg_distance_score_place],
+                    'POI Reviewers Norm Distance': [sum_user_score_norm],
+                    'Road Intensity Score': [road_intensity_score],
+                    'Road Distance': [distance_score_road]
+                })
+        
+                formatted_score = "{:.2f}%".format(effectivity_score)
+                st.markdown(f"<span style='font-size: 32px; color: red;'>{formatted_score}</span>", unsafe_allow_html=True)
+                # st.write("")
+                st.write(df_effectivity)
             
-                # Use Vision API to detect vehicles
-                image = vision.Image()
-                image.source.image_uri = street_view_url
-                response = client.object_localization(image=image)
-                for obj in response.localized_object_annotations:
-                    if obj.name in ["Car", "Truck", "Bus", "Bicycle", "Motorcycle"]:
-                        total_vehicles += 1
+                st.subheader("Input Location Map:")
             
-            st.write(f"Total vehicles detected: {total_vehicles}")
+                # Convert lat and lon to float for arithmetic operations
+                lat_float = float(lat)
+                lon_float = float(lon)
+            
+                # Build the Google Maps Static API URL
+                base_url = "https://maps.googleapis.com/maps/api/staticmap?"
+            
+                # Parameters
+                center = f"{lat_float},{lon_float}"
+                zoom = "18"
+                size = "600x300"
+                maptype = "roadmap"
+                marker = f"color:red|label:C|{lat_float},{lon_float}"
+                rad = 200
+                path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
+            
+                # # Constructing the full URL
+                # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
+            
+                # Generate points for circle approximation
+                circle_points = generate_circle_points(lat_float, lon_float, rad)
+                
+                # Construct circle path string
+                circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+                
+                # Incorporate circle path into the full URL
+                map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
+        
+                # Display the map in Streamlit
+                st.image(map_url)
+        
+                # Display the map in Streamlit
+                st.write("Street Views")
+                # Build the Google Street View Static API URL for different directions
+                street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+                street_view_size = "600x300"
+                
+                directions = {
+                    "North": 0,
+                    "East": 90,
+                    "South": 180,
+                    "West": 270
+                }
+                
+                # Fetch and display Street View images for each direction
+                for direction_name, heading_value in directions.items():
+                    street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                    
+                    # Display the Street View image in Streamlit
+                    st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+    
+                # # Display the map in Streamlit
+                # st.write("Street Views")
+                # # Build the Google Street View Static API URL for different directions
+                # street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+                # street_view_size = "600x300"
+                
+                # directions = {
+                #     "North": 0,
+                #     "East": 90,
+                #     "South": 180,
+                #     "West": 270
+                # }
+                
+                # total_vehicles = 0
+                
+                # # Fetch and display Street View images for each direction
+                # for direction_name, heading_value in directions.items():
+                #     street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                    
+                #     # Display the Street View image in Streamlit
+                #     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+                
+                #     # Use Vision API to detect vehicles
+                #     image = vision.Image()
+                #     image.source.image_uri = street_view_url
+                #     response = client.object_localization(image=image)
+                #     for obj in response.localized_object_annotations:
+                #         if obj.name in ["Car", "Truck", "Bus", "Bicycle", "Motorcycle"]:
+                #             total_vehicles += 1
+                
+                # st.write(f"Total vehicles detected: {total_vehicles}")
 
-            # except:
-            #     st.write("There is no road nearby, please submit another coordinate.")
+            except:
+                st.write("There is no road nearby, please submit another coordinate.")
 
 if input_method == "Select from map (Soon)":
     st.write("Coming Soon...")
