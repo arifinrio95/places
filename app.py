@@ -391,7 +391,8 @@ if input_method == "Input location link":
                 distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
                 
                 # 4. Hitung Effectivity Score
-                effectivity_score = (sum_user_score_norm + road_intensity_score * distance_score_road)/2 * 100
+                poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
+                effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
                 
                 # 5. Simpan ke DataFrame baru
                 df_effectivity = pd.DataFrame({
