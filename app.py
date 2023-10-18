@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup as BS
 from math import sin, cos, sqrt, atan2, radians
 import pydeck as pdk
 import overpy
-import cv2
+# import cv2
 import numpy as np
 
 from google.cloud import vision
