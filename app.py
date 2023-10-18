@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as BS
 from math import sin, cos, sqrt, atan2, radians
 import pydeck as pdk
 import overpy
+from streamlit_googlemaps import st_googlemap
 
 headers = {'User-agent': 'Mozilla/5.0'}
 
@@ -434,19 +435,10 @@ if input_method == "Input location link":
         # Display the map in Streamlit
         st.image(map_url)
 
-if input_method == "Select from map":  # Select from map
-    st.write("Click on the map to choose a location")
-    
-    # Membuat dataframe kosong untuk menampilkan peta awal
-    map_data = pd.DataFrame({
-        'lat': [],
-        'lon': []
-    })
-    
-    map_figure = st.map(map_data)
-    
-    if map_figure:  # Jika ada koordinat yang dikembalikan dari st.map()
-        lat, lon = map_figure[0]['lat'], map_figure[0]['lon']
+if input_method == "Select from map":
+    location = st_googlemap()
+    if location:
+        lat, lon = location['lat'], location['lng']
 
         # total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
 
