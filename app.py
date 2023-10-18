@@ -402,6 +402,7 @@ if input_method == "Input location link":
 
         formatted_score = "{:.2f}%".format(effectivity_score)
         st.markdown(f"<h1 style='color: red;'>{formatted_score}</h1>", unsafe_allow_html=True)
+        st.write("")
         st.write(df_effectivity)
     
         st.subheader("Input Location Map:")
@@ -436,6 +437,17 @@ if input_method == "Input location link":
         
         # Display the map in Streamlit
         st.image(map_url)
+
+        # Display the map in Streamlit
+        st.image(map_url)
+        
+        # Build the Google Street View Static API URL
+        street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+        street_view_size = "600x300"
+        street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&key={api_key}"
+        
+        # Display the Street View image in Streamlit
+        st.image(street_view_url, caption="Street View", use_column_width=True)
 
 if input_method == "Select from map (Soon)":
     st.write("Coming Soon...")
