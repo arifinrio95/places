@@ -10,7 +10,8 @@ import overpy
 import numpy as np
 
 import json
-from google.oauth2.credentials import Credentials
+# from google.oauth2.credentials import Credentials
+import google.oauth2.credentials
 from google.cloud import vision
 
 creds_info = st.secrets["google"]["credentials"]
