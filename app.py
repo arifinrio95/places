@@ -407,9 +407,14 @@ if input_method == "Input location link":
             place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (meters)']
             sorted_df = place_df_grouped.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
         
-        
             st.subheader("Places Detail:")
             st.write(sorted_df)
+
+            # Calculate POI Density
+            r = place_df_grouped['Distance (meters)'].max()
+            area_circle = math.pi * r**2
+            poi_density = area_circle / len(place_df_grouped)
+            st.write(f"POI Density: {poi_density} m2/POI")
         
             # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
             roads_data_list = get_google_roads_nearby(lat, lon, api_key)
