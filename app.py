@@ -455,6 +455,7 @@ if input_method == "Input location link":
                 poi_density_norm = 0
             if poi_density < 1000:
                 poi_density_norm = 1-poi_density/1000
+            st.write("POI Density Norm:",poi_density_norm)
             
             # 5. Hitung Effectivity Score
             # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
