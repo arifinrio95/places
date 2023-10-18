@@ -392,10 +392,10 @@ if input_method == "Input location link":
                 
                 # 4. Hitung Effectivity Score
                 # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
-                if road_intensity_score < 8:
+                if road_intensity_score < 0.8:
                     poi_weight = 0.7
                     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
-                else:
+                if road_intensity_score >= 0.8:
                     poi_weight = 0.3
                     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
                 
