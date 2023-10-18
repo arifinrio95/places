@@ -474,9 +474,9 @@ if input_method == "Input location link":
                     'Effectivity Score': [effectivity_score],
                     'POI Reviewers': [sum_user_score],
                     # 'Avg Distance POI': [avg_distance_score_place],
-                    'POI Density (m2/POI)': [poi_density]
+                    'POI Density (m2/POI)': [poi_density],
                     # 'POI Reviewers Norm Distance': [sum_user_s÷core_norm],
-                    'Road Intensity Score': [road_intensity_score],
+                    'Road Intensity Score': [road_intensity_score]
                     # 'Road Distance': [distance_score_road]
                 })
         
