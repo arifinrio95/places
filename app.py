@@ -436,12 +436,18 @@ if input_method == "Input location link":
 
 if input_method == "Select from map":  # Select from map
     st.write("Click on the map to choose a location")
-    # Menggunakan Pydeck untuk peta dinamis
-    INITIAL_VIEW_STATE = pdk.ViewState(latitude=0, longitude=0, zoom=2)
-    st.pydeck_chart(pdk.Deck(map_style="mapbox://styles/mapbox/light-v9", initial_view_state=INITIAL_VIEW_STATE))
     
-    lat, lon = st.map()
-    if lat and lon:
+    # Membuat dataframe kosong untuk menampilkan peta awal
+    map_data = pd.DataFrame({
+        'lat': [],
+        'lon': []
+    })
+    
+    map_figure = st.map(map_data)
+    
+    if map_figure:  # Jika ada koordinat yang dikembalikan dari st.map()
+        lat, lon = map_figure[0]['lat'], map_figure[0]['lon']
+
         # total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
 
         # Calculate density
