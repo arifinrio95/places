@@ -297,7 +297,8 @@ def assign_intensity(road_type):
         'residential': 5,
         'service': 4,
         'track': 3,
-        'unclassified': 2
+        'unclassified': 2,
+        'no_road': 0
     }
     
     score = intensity_map.get(road_type, 1)
@@ -362,7 +363,11 @@ if input_method == "Input location link":
             roads_data_list = get_google_roads_nearby(lat, lon, api_key)
             
             roads_df = pd.DataFrame(roads_data_list)
-            roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
+            try:
+                roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
+            except:
+                roads_df['Road Type'] = 'no_road'
+                roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
             roads_df = roads_df.drop('road_id', axis = 1)
             roads_df = roads_df.drop_duplicates()
             roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
