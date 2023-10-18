@@ -438,13 +438,23 @@ if input_method == "Input location link":
         # Display the map in Streamlit
         st.image(map_url)
         
-        # Build the Google Street View Static API URL
+        # Build the Google Street View Static API URL for different directions
         street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
         street_view_size = "600x300"
-        street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&key={api_key}"
         
-        # Display the Street View image in Streamlit
-        st.image(street_view_url, caption="Street View", use_column_width=True)
+        directions = {
+            "North": 0,
+            "East": 90,
+            "South": 180,
+            "West": 270
+        }
+        
+        # Fetch and display Street View images for each direction
+        for direction_name, heading_value in directions.items():
+            street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+            
+            # Display the Street View image in Streamlit
+            st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
 
 if input_method == "Select from map (Soon)":
     st.write("Coming Soon...")
