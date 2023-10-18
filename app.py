@@ -10,12 +10,16 @@ import overpy
 import numpy as np
 
 import json
-# from google.oauth2.credentials import Credentials
-import google.oauth2.credentials
+from google.oauth2.credentials import Credentials
 from google.cloud import vision
 
+# Memuat kredensial dari secrets.toml
 creds_info = json.loads(st.secrets["google"]["credentials"])
-creds = google.oauth2.credentials.Credentials.from_authorized_user_info(creds_info)
+
+# Menggunakan kredensial untuk membuat objek Credentials
+creds = Credentials.from_service_account_info(creds_info)
+
+# Membuat klien Vision API
 client = vision.ImageAnnotatorClient(credentials=creds)
 
 headers = {'User-agent': 'Mozilla/5.0'}
