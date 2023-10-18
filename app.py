@@ -9,18 +9,12 @@ import overpy
 # import cv2
 import numpy as np
 
-from google.cloud import vision
-# from google.cloud.vision import types
-
-# Inisialisasi klien Vision API
+import json
 from google.oauth2.credentials import Credentials
-import google.auth.transport.requests
+from google.cloud import vision
 
-# Membuat kredensial dari string JSON
-creds = Credentials.from_authorized_user_info(st.secrets["GOOGLE_API_KEY"])
-transport = google.auth.transport.requests.Request()
-creds.refresh(transport)
-
+creds_info = json.loads(st.secrets["google"]["credentials"])
+creds = Credentials.from_authorized_user_info(creds_info)
 client = vision.ImageAnnotatorClient(credentials=creds)
 
 headers = {'User-agent': 'Mozilla/5.0'}
