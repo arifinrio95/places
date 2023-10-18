@@ -316,7 +316,7 @@ def assign_intensity(road_type):
 st.title("Nearby Places Analysis")
 
 # Memberikan pilihan kepada pengguna
-input_method = st.radio("Choose input method:", ["Input location link", "Select from map"])
+input_method = st.radio("Choose input method:", ["", "Input location link", "Select from map"])
 
 if input_method == "Input location link":
     # Taking inputs
@@ -434,7 +434,7 @@ if input_method == "Input location link":
         # Display the map in Streamlit
         st.image(map_url)
 
-    else:  # Select from map
+    if input_method == "Select from map":  # Select from map
         st.write("Click on the map to choose a location")
         # Menggunakan Pydeck untuk peta dinamis
         INITIAL_VIEW_STATE = pdk.ViewState(latitude=0, longitude=0, zoom=2)
