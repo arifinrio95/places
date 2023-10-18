@@ -535,24 +535,18 @@ if input_method == "Input location link":
             for direction_name, heading_value in directions.items():
                 street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
                 
-                # Ambil gambar dari URL
-                response = requests.get(street_view_url)
-                image = response.content
-                
-                # Kirim gambar ke Google Vision API
-                image = vision.Image(content=image)
+                # Display the Street View image in Streamlit
+                st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+            
+                # Use Vision API to detect vehicles
+                image = vision.Image()
+                image.source.image_uri = street_view_url
                 response = client.object_localization(image=image)
-                objects = response.localized_object_annotations
+                for obj in response.localized_object_annotations:
+                    if obj.name in ["Car", "Truck", "Bus", "Bicycle", "Motorcycle"]:
+                        total_vehicles += 1
             
-                # Hitung kendaraan
-                vehicles = ['car', 'truck', 'bus', 'motorcycle', 'bicycle']
-                vehicle_count = sum(1 for obj in objects if obj.name.lower() in vehicles)
-                total_vehicles += vehicle_count
-            
-                caption = f"Street View ({direction_name}) - Vehicles detected: {vehicle_count}"
-                st.image(street_view_url, caption=caption, use_column_width=True)
-            
-            st.write(f"Total vehicles detected in all images: {total_vehicles}")
+            st.write(f"Total vehicles detected: {total_vehicles}")
 
             # except:
             #     st.write("There is no road nearby, please submit another coordinate.")
