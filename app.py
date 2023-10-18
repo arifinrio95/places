@@ -10,7 +10,7 @@ import overpy
 import numpy as np
 
 from google.cloud import vision
-from google.cloud.vision import types
+# from google.cloud.vision import types
 
 # Inisialisasi klien Vision API
 from google.oauth2.credentials import Credentials
