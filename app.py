@@ -370,6 +370,7 @@ if input_method == "Input location link":
         st.write(roads_df_sorted)
     
         st.subheader("Effectivity Score :")
+        
         # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
         place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
         place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
@@ -398,7 +399,9 @@ if input_method == "Input location link":
             'Road Intensity Score': [road_intensity_score],
             'Road Distance': [distance_score_road]
         })
-        
+
+        # st.header(effectivity_score)
+        st.markdown(f"<h1 style='color: red;'>{effectivity_score}</h1>", unsafe_allow_html=True)
         st.write(df_effectivity)
     
         st.subheader("Input Location Map:")
