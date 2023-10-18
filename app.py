@@ -451,7 +451,7 @@ if input_method == "Input location link":
                 # 4. Hitung POI Density Score
                 # if poi_density <= 100:
                 #     poi_density = 1
-                if poi_density >= 1000
+                if poi_density >= 1000:
                     poi_density = 0
                 else:
                     poi_density = 1-poi_density/1000
