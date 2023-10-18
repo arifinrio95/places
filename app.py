@@ -400,8 +400,8 @@ if input_method == "Input location link":
             'Road Distance': [distance_score_road]
         })
 
-        # st.header(effectivity_score)
-        st.markdown(f"<h1 style='color: red;'>{effectivity_score}</h1>", unsafe_allow_html=True)
+        formatted_score = "{:.2f}%".format(effectivity_score)
+        st.markdown(f"<h1 style='color: red;'>{formatted_score}</h1>", unsafe_allow_html=True)
         st.write(df_effectivity)
     
         st.subheader("Input Location Map:")
