@@ -470,6 +470,9 @@ if input_method == "Input location link":
             #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
 
             # 5. Segment Score
+            poi_quality = ''
+            poi_density_class = ''
+            
             if sum_user_score_norm < 0.33:
                 poi_quality = 'Low Quality POI'
             if sum_user_score_norm >= 0.33 and sum_user_score_norm < 0.66:
