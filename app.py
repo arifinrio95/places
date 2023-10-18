@@ -316,7 +316,7 @@ def assign_intensity(road_type):
 st.title("Nearby Places Analysis")
 
 # Memberikan pilihan kepada pengguna
-input_method = st.radio("Choose input method:", ["", "Input location link", "Select from map"])
+input_method = st.radio("Choose input method:", [" ", "Input location link", "Select from map"])
 
 if input_method == "Input location link":
     # Taking inputs
