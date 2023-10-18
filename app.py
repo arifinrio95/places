@@ -17,11 +17,7 @@ from google.cloud import vision
 # creds_info = json.loads(st.secrets["google"]["credentials"])
 creds_info = st.secrets["google"]["credentials"]
 
-
-# Menggunakan kredensial untuk membuat objek Credentials
-creds = Credentials.from_service_account_info(creds_info)
-
-# Membuat klien Vision API
+creds = vision.Credentials.from_service_account_info(creds_info)
 client = vision.ImageAnnotatorClient(credentials=creds)
 
 headers = {'User-agent': 'Mozilla/5.0'}
