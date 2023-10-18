@@ -401,8 +401,8 @@ if input_method == "Input location link":
         })
 
         formatted_score = "{:.2f}%".format(effectivity_score)
-        st.markdown(f"<h1 style='color: red;'>{formatted_score}</h1>", unsafe_allow_html=True)
-        st.write("")
+        st.markdown(f"<span style='font-size: 32px; color: red;'>{formatted_score}</span>", unsafe_allow_html=True)
+        # st.write("")
         st.write(df_effectivity)
     
         st.subheader("Input Location Map:")
