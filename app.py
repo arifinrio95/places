@@ -13,8 +13,8 @@ import json
 from google.oauth2.credentials import Credentials
 from google.cloud import vision
 
-creds_info = json.loads(st.secrets["google"]["credentials"])
-creds = Credentials.from_authorized_user_info(creds_info)
+creds_info = st.secrets["google"]["credentials"]
+creds = google.oauth2.credentials.Credentials.from_authorized_user_info(creds_info)
 client = vision.ImageAnnotatorClient(credentials=creds)
 
 headers = {'User-agent': 'Mozilla/5.0'}
