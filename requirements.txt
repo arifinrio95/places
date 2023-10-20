@@ -4,3 +4,4 @@ beautifulsoup4
 pydeck
 overpy
 google-cloud-vision
+openai
