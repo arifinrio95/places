@@ -22,7 +22,8 @@ def gpt_descibe(poi_density, poi_quality, road_type, road_intensity_score, json_
     ]
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        # model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=messages,
         max_tokens=4000,
         temperature=0
