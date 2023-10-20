@@ -10,7 +10,7 @@ import overpy
 # import cv2
 import numpy as np
 import openai
-from streamlit_leaflet import leaflet_map, MapContainer
+from streamlit-leaflet import leaflet_map, MapContainer
 
 openai.api_key = st.secrets['user_api']
 
