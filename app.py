@@ -27,7 +27,7 @@ def gpt_descibe(poi_density, poi_quality, road_type, road_intensity_score, json_
         max_tokens=4000,
         temperature=0
     )
-    script = response.choices[0].message['content']
+    desc = response.choices[0].message['content']
 
     return desc
     
@@ -400,7 +400,7 @@ if input_method == "Input location link":
     api_key = st.secrets['GOOGLE_API_KEY'] # This is not secure. Consider using secrets management or Streamlit Secrets
     
     if st.button('Analyze'):
-        with st.spinner('Analyzing...(~6 seconds)'):
+        with st.spinner('Scrapping...(~6 seconds)'):
             lat, lon = get_latlong(latlong)
             # total_places, total_ratings, total_users_rated = get_nearby_places(lat, lon, api_key)
         
@@ -535,97 +535,98 @@ if input_method == "Input location link":
             st.write(df_effectivity)
             
             st.subheader("Analysis:")
-            json_places = sorted_df.to_json(orient='records', lines=False)
-            gpt_description = gpt_descibe(poi_density_class, poi_quality, roads_df['Road Type'].iloc[0], roads_df['Intensitas (Score)'].iloc[0], json_places)
-            st.write(gpt_description)
-            
-            st.subheader("Input Location Map:")
-        
-            # Convert lat and lon to float for arithmetic operations
-            lat_float = float(lat)
-            lon_float = float(lon)
-        
-            # Build the Google Maps Static API URL
-            base_url = "https://maps.googleapis.com/maps/api/staticmap?"
-        
-            # Parameters
-            center = f"{lat_float},{lon_float}"
-            zoom = "18"
-            size = "600x300"
-            maptype = "roadmap"
-            marker = f"color:red|label:C|{lat_float},{lon_float}"
-            rad = 200
-            path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
-        
-            # # Constructing the full URL
-            # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
-        
-            # Generate points for circle approximation
-            circle_points = generate_circle_points(lat_float, lon_float, rad)
-            
-            # Construct circle path string
-            circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
-            
-            # Incorporate circle path into the full URL
-            map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
-    
-            # Display the map in Streamlit
-            st.image(map_url)
-    
-            # Display the map in Streamlit
-            st.write("Street Views")
-            # Build the Google Street View Static API URL for different directions
-            street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
-            street_view_size = "600x300"
-            
-            directions = {
-                "North": 0,
-                "East": 90,
-                "South": 180,
-                "West": 270
-            }
-            
-            # Fetch and display Street View images for each direction
-            for direction_name, heading_value in directions.items():
-                street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+            with st.spinner('Analyzing...(~1 minute)'):
+                json_places = sorted_df.to_json(orient='records', lines=False)
+                gpt_description = gpt_descibe(poi_density_class, poi_quality, roads_df['Road Type'].iloc[0], roads_df['Intensitas (Score)'].iloc[0], json_places)
+                st.write(gpt_description)
                 
-                # Display the Street View image in Streamlit
-                st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
-
-            # # Display the map in Streamlit
-            # st.write("Street Views")
-            # # Build the Google Street View Static API URL for different directions
-            # street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
-            # street_view_size = "600x300"
+                st.subheader("Input Location Map:")
             
-            # directions = {
-            #     "North": 0,
-            #     "East": 90,
-            #     "South": 180,
-            #     "West": 270
-            # }
+                # Convert lat and lon to float for arithmetic operations
+                lat_float = float(lat)
+                lon_float = float(lon)
             
-            # total_vehicles = 0
+                # Build the Google Maps Static API URL
+                base_url = "https://maps.googleapis.com/maps/api/staticmap?"
             
-            # # Fetch and display Street View images for each direction
-            # for direction_name, heading_value in directions.items():
-            #     street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                # Parameters
+                center = f"{lat_float},{lon_float}"
+                zoom = "18"
+                size = "600x300"
+                maptype = "roadmap"
+                marker = f"color:red|label:C|{lat_float},{lon_float}"
+                rad = 200
+                path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
+            
+                # # Constructing the full URL
+                # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
+            
+                # Generate points for circle approximation
+                circle_points = generate_circle_points(lat_float, lon_float, rad)
                 
-            #     # Display the Street View image in Streamlit
-            #     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
-            
-            #     # Use Vision API to detect vehicles
-            #     image = vision.Image()
-            #     image.source.image_uri = street_view_url
-            #     response = client.object_localization(image=image)
-            #     for obj in response.localized_object_annotations:
-            #         if obj.name in ["Car", "Truck", "Bus", "Bicycle", "Motorcycle"]:
-            #             total_vehicles += 1
-            
-            # st.write(f"Total vehicles detected: {total_vehicles}")
-
-            # except:
-            #     st.write("There is no road nearby, please submit another coordinate.")
+                # Construct circle path string
+                circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+                
+                # Incorporate circle path into the full URL
+                map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
+        
+                # Display the map in Streamlit
+                st.image(map_url)
+        
+                # Display the map in Streamlit
+                st.write("Street Views")
+                # Build the Google Street View Static API URL for different directions
+                street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+                street_view_size = "600x300"
+                
+                directions = {
+                    "North": 0,
+                    "East": 90,
+                    "South": 180,
+                    "West": 270
+                }
+                
+                # Fetch and display Street View images for each direction
+                for direction_name, heading_value in directions.items():
+                    street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                    
+                    # Display the Street View image in Streamlit
+                    st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+    
+                # # Display the map in Streamlit
+                # st.write("Street Views")
+                # # Build the Google Street View Static API URL for different directions
+                # street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+                # street_view_size = "600x300"
+                
+                # directions = {
+                #     "North": 0,
+                #     "East": 90,
+                #     "South": 180,
+                #     "West": 270
+                # }
+                
+                # total_vehicles = 0
+                
+                # # Fetch and display Street View images for each direction
+                # for direction_name, heading_value in directions.items():
+                #     street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+                    
+                #     # Display the Street View image in Streamlit
+                #     st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+                
+                #     # Use Vision API to detect vehicles
+                #     image = vision.Image()
+                #     image.source.image_uri = street_view_url
+                #     response = client.object_localization(image=image)
+                #     for obj in response.localized_object_annotations:
+                #         if obj.name in ["Car", "Truck", "Bus", "Bicycle", "Motorcycle"]:
+                #             total_vehicles += 1
+                
+                # st.write(f"Total vehicles detected: {total_vehicles}")
+    
+                # except:
+                #     st.write("There is no road nearby, please submit another coordinate.")
 
 if input_method == "Select from map (Soon)":
     st.write("Coming Soon...")
