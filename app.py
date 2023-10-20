@@ -27,7 +27,7 @@ def gpt_descibe(poi_density, poi_quality, road_type, road_intensity_score, json_
         model="gpt-3.5-turbo-16k",
         messages=messages,
         max_tokens=4000,
-        temperature=0
+        temperature=7
     )
     desc = response.choices[0].message['content']
 
