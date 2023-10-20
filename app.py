@@ -18,7 +18,7 @@ def gpt_descibe(poi_density, poi_quality, road_type, road_intensity_score, json_
         {"role": "system", "content": "Aku akan menganalisa potensi pemasangan iklan di area yang kamu jelaskan."},
         {"role": "user", "content": f"""Jelaskan bagaimana peluang pemasangan iklan di area yang memeiliki kepadatan POI (point of interest) dengan level {poi_density},
         dengan tingkat keramaian total dari POI2 tersebut termasuk {poi_quality}, berada di jalan dengan jenis {road_type} dengan intensitas sekitar {road_intensity_score} dari 10.
-        Berikut adalah json_string dari 60 POI yang berada di sekitarnya : {json_places}. Jelaskan kira-kira bagaimana interest atau market sesuai dengan 60 POI tersebut."""}
+        Berikut adalah json_string dari 60 POI terdekat: {json_places}. Jelaskan kira-kira bagaimana interest atau market sesuai dengan 60 POI tersebut."""}
     ]
 
     response = openai.ChatCompletion.create(
