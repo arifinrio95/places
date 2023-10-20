@@ -5,4 +5,4 @@ pydeck
 overpy
 google-cloud-vision
 openai
-streamlit-leaflet==0.1.5
+streamlit-leaflet
