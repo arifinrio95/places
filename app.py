@@ -10,7 +10,7 @@ import overpy
 # import cv2
 import numpy as np
 import openai
-from streamlit_leaflet import leaflet_map, MapContainer
+# from streamlit_leaflet import leaflet_map, MapContainer
 
 openai.api_key = st.secrets['user_api']
 
@@ -394,7 +394,7 @@ def detect_vehicles(img, net, output_layers):
 st.title("Spot Score Analyzer")
 
 # Memberikan pilihan kepada pengguna
-input_method = st.radio("Choose input method:", ["Input location link", "Select from map (Soon)"])
+input_method = st.radio("Choose input method:", ["Input location link", "Choose from map (Soon)"])
 
 if input_method == "Input location link":
     # Taking inputs
@@ -632,196 +632,197 @@ if input_method == "Input location link":
                 # except:
                 #     st.write("There is no road nearby, please submit another coordinate.")
 
-if input_method == "Choose from map":
-    st.write("Silakan klik pada peta untuk memilih lokasi.")
+if input_method == "Choose from map (Soon)":
+    st.write("Coming Soon.")
+    # st.write("Silakan klik pada peta untuk memilih lokasi.")
 
-    # Menetapkan koordinat awal (misalnya, koordinat dari Jakarta)
-    initial_coords = [6.2000, 106.8167]
+    # # Menetapkan koordinat awal (misalnya, koordinat dari Jakarta)
+    # initial_coords = [6.2000, 106.8167]
 
-    # Menyiapkan peta dengan Streamlit-Leaflet
-    m = leaflet_map(center=initial_coords, zoom=12)
+    # # Menyiapkan peta dengan Streamlit-Leaflet
+    # m = leaflet_map(center=initial_coords, zoom=12)
 
-    # Menangani klik peta
-    if m.clicked:
-        lat, lon = m.location
-        st.write(f"Anda telah memilih lokasi: Latitude: {lat}, Longitude: {lon}")
+    # # Menangani klik peta
+    # if m.clicked:
+    #     lat, lon = m.location
+    #     st.write(f"Anda telah memilih lokasi: Latitude: {lat}, Longitude: {lon}")
 
-        # Menjalankan analisis dengan koordinat yang dipilih
-        with st.spinner('Mengambil data...'):
-            place_data_list = get_nearby_places_2(lat, lon, api_key)
-            place_df = pd.DataFrame(place_data_list)
-            place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({
-                'user_ratings_total': 'sum',
-                'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
-            }).reset_index()
-            place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (meters)']
-            sorted_df = place_df_grouped.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
+    #     # Menjalankan analisis dengan koordinat yang dipilih
+    #     with st.spinner('Mengambil data...'):
+    #         place_data_list = get_nearby_places_2(lat, lon, api_key)
+    #         place_df = pd.DataFrame(place_data_list)
+    #         place_df_grouped = place_df.groupby(['primary_type', 'name']).agg({
+    #             'user_ratings_total': 'sum',
+    #             'distance': 'mean'  # Assuming you want the average distance in case of multiple places with the same name and type
+    #         }).reset_index()
+    #         place_df_grouped.columns = ['Place Type', 'Name', 'Total Users Rated', 'Distance (meters)']
+    #         sorted_df = place_df_grouped.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
         
-            st.subheader("Places Detail:")
-            st.write(sorted_df)
+    #         st.subheader("Places Detail:")
+    #         st.write(sorted_df)
 
-            # Calculate POI Density
-            r = place_df_grouped['Distance (meters)'].max()
-            area_circle = math.pi * r**2
-            poi_density = area_circle / len(place_df_grouped)
-            st.write(f"POI Density: {poi_density} m2/POI")
+    #         # Calculate POI Density
+    #         r = place_df_grouped['Distance (meters)'].max()
+    #         area_circle = math.pi * r**2
+    #         poi_density = area_circle / len(place_df_grouped)
+    #         st.write(f"POI Density: {poi_density} m2/POI")
         
-            # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
-            roads_data_list = get_google_roads_nearby(lat, lon, api_key)
+    #         # roads_data_list = get_osm_roads_within_radius(lat, lon, rad)
+    #         roads_data_list = get_google_roads_nearby(lat, lon, api_key)
             
-            roads_df = pd.DataFrame(roads_data_list)
-            # try:
-            roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
-            roads_df = roads_df.drop('road_id', axis = 1)
-            roads_df = roads_df.drop_duplicates()
-            roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
+    #         roads_df = pd.DataFrame(roads_data_list)
+    #         # try:
+    #         roads_df['Intensitas'], roads_df['Intensitas (Score)'] = zip(*roads_df['Road Type'].apply(assign_intensity))
+    #         roads_df = roads_df.drop('road_id', axis = 1)
+    #         roads_df = roads_df.drop_duplicates()
+    #         roads_df_sorted = roads_df.sort_values(by='Distance (meters)', ascending=True).reset_index(drop=True)
             
-            st.subheader("Nearby Roads :")
-            st.write(roads_df_sorted)
+    #         st.subheader("Nearby Roads :")
+    #         st.write(roads_df_sorted)
         
-            st.subheader("Effectivity Score :")
+    #         st.subheader("Effectivity Score :")
             
-            # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
-            place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
-            place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
+    #         # place_df_grouped['POI Reviewers'] = place_df_grouped['Total Users Rated'].apply(lambda x: x/1000 if x <= 1000 else 1)
+    #         place_df_grouped['Distance Score Place'] = place_df_grouped['Distance (meters)'].apply(lambda x: 1 - x/500 if x <= 500 else 0)
+    #         place_df_grouped['POI Reviewers Norm'] = place_df_grouped['Total Users Rated']*place_df_grouped['Distance Score Place']#.apply(lambda x: x/1000 if x <= 1000 else 1)
             
-            # 2. Hitung rata-rata UserScore dan DistanceScorePlace
-            sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
-            if sum_user_score <= 1000:
-                sum_user_score_norm = sum_user_score / 1000
-            else:
-                sum_user_score_norm = 1
-            avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
+    #         # 2. Hitung rata-rata UserScore dan DistanceScorePlace
+    #         sum_user_score = place_df_grouped['POI Reviewers Norm'].sum()
+    #         if sum_user_score <= 1000:
+    #             sum_user_score_norm = sum_user_score / 1000
+    #         else:
+    #             sum_user_score_norm = 1
+    #         avg_distance_score_place = place_df_grouped['Distance Score Place'].mean()
             
-            # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
-            road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
-            distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
+    #         # 3. Ambil nilai Intensitas (Score) dan Distance (meters) dari roads_df
+    #         road_intensity_score = roads_df['Intensitas (Score)'].iloc[0] / 10
+    #         distance_score_road = 1 - roads_df['Distance (meters)'].iloc[0] / 100 if roads_df['Distance (meters)'].iloc[0] <= 100 else 0
 
-            # 4. Hitung POI Density Score
-            # if poi_density <= 100:
-            #     poi_density = 1
-            if poi_density >= 1000:
-                poi_density_norm = 0
-            if poi_density < 1000:
-                poi_density_norm = 1-poi_density/1000
-            # st.write("POI Density Norm:",poi_density_norm)
+    #         # 4. Hitung POI Density Score
+    #         # if poi_density <= 100:
+    #         #     poi_density = 1
+    #         if poi_density >= 1000:
+    #             poi_density_norm = 0
+    #         if poi_density < 1000:
+    #             poi_density_norm = 1-poi_density/1000
+    #         # st.write("POI Density Norm:",poi_density_norm)
             
-            # 5. Hitung Effectivity Score
-            # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
-            poi_weight = 0.5
-            poi_dense_weight = 0.2
-            road_weight = 0.3
-            effectivity_score = (poi_weight*sum_user_score_norm + poi_dense_weight*poi_density_norm + road_weight*(road_intensity_score * distance_score_road)) * 100
-            # if road_intensity_score < 0.8:
-            #     poi_weight = 0.7
-            #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
-            # if road_intensity_score >= 0.8:
-            #     poi_weight = 0.3
-            #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+    #         # 5. Hitung Effectivity Score
+    #         # poi_weight = st.slider('Choose weight of POI / Road Type :', 0, 100)
+    #         poi_weight = 0.5
+    #         poi_dense_weight = 0.2
+    #         road_weight = 0.3
+    #         effectivity_score = (poi_weight*sum_user_score_norm + poi_dense_weight*poi_density_norm + road_weight*(road_intensity_score * distance_score_road)) * 100
+    #         # if road_intensity_score < 0.8:
+    #         #     poi_weight = 0.7
+    #         #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
+    #         # if road_intensity_score >= 0.8:
+    #         #     poi_weight = 0.3
+    #         #     effectivity_score = (poi_weight*sum_user_score_norm + (1-poi_weight)*(road_intensity_score * distance_score_road)) * 100
 
-            # 5. Segment Score
-            poi_quality = ''
-            poi_density_class = ''
+    #         # 5. Segment Score
+    #         poi_quality = ''
+    #         poi_density_class = ''
             
-            if sum_user_score_norm < 0.33:
-                poi_quality = 'Low Quality POI'
-            if sum_user_score_norm >= 0.33 and sum_user_score_norm < 0.66:
-                poi_quality = 'Standard Quality POI'
-            if sum_user_score_norm >= 0.66:
-                poi_quality = 'High Quality POI'
-            if poi_density_norm < 0.33:
-                poi_density_class = 'Low Density POI'
-            if poi_density_norm >= 0.33 and poi_density_norm < 0.66:
-                poi_density_class = 'Normal Density POI'
-            if poi_density_norm >= 0.66:
-                poi_density_class = 'High Density POI'
-            # if road_intensity_score <= 5:
-            #     road_intensity_class = 'Local Roads'
-            # if road_intensity_score >= 6 and road_intensity_score <= 7:
-            #     road_intensity_class = 'Arterial Roads'
-            # if road_intensity_score >= 8:
-            #     road_intensity_class = 'Main Roads/Highways'
+    #         if sum_user_score_norm < 0.33:
+    #             poi_quality = 'Low Quality POI'
+    #         if sum_user_score_norm >= 0.33 and sum_user_score_norm < 0.66:
+    #             poi_quality = 'Standard Quality POI'
+    #         if sum_user_score_norm >= 0.66:
+    #             poi_quality = 'High Quality POI'
+    #         if poi_density_norm < 0.33:
+    #             poi_density_class = 'Low Density POI'
+    #         if poi_density_norm >= 0.33 and poi_density_norm < 0.66:
+    #             poi_density_class = 'Normal Density POI'
+    #         if poi_density_norm >= 0.66:
+    #             poi_density_class = 'High Density POI'
+    #         # if road_intensity_score <= 5:
+    #         #     road_intensity_class = 'Local Roads'
+    #         # if road_intensity_score >= 6 and road_intensity_score <= 7:
+    #         #     road_intensity_class = 'Arterial Roads'
+    #         # if road_intensity_score >= 8:
+    #         #     road_intensity_class = 'Main Roads/Highways'
 
             
-            # 6. Simpan ke DataFrame baru
-            df_effectivity = pd.DataFrame({
-                'Effectivity Score': [effectivity_score],
-                'POI Reviewers': [sum_user_score],
-                'POI Quality': [poi_quality],
-                # 'Avg Distance POI': [avg_distance_score_place],
-                'POI Density (m2/POI)': [poi_density],
-                'POI Density Class': [poi_density_class],
-                # 'POI Reviewers Norm Distance': [sum_user_s÷core_norm],
-                'Road Intensity Score': [road_intensity_score],
-                'Road Type': [roads_df['Road Type'].iloc[0].capitalize()]
-                # 'Road Distance': [distance_score_road]
-            })
+    #         # 6. Simpan ke DataFrame baru
+    #         df_effectivity = pd.DataFrame({
+    #             'Effectivity Score': [effectivity_score],
+    #             'POI Reviewers': [sum_user_score],
+    #             'POI Quality': [poi_quality],
+    #             # 'Avg Distance POI': [avg_distance_score_place],
+    #             'POI Density (m2/POI)': [poi_density],
+    #             'POI Density Class': [poi_density_class],
+    #             # 'POI Reviewers Norm Distance': [sum_user_s÷core_norm],
+    #             'Road Intensity Score': [road_intensity_score],
+    #             'Road Type': [roads_df['Road Type'].iloc[0].capitalize()]
+    #             # 'Road Distance': [distance_score_road]
+    #         })
     
-            formatted_score = "{:.2f}%".format(effectivity_score)
-            st.markdown(f"<span style='font-size: 32px; color: red;'>{formatted_score}</span>", unsafe_allow_html=True)
-            # st.write("")
-            st.write(df_effectivity)
+    #         formatted_score = "{:.2f}%".format(effectivity_score)
+    #         st.markdown(f"<span style='font-size: 32px; color: red;'>{formatted_score}</span>", unsafe_allow_html=True)
+    #         # st.write("")
+    #         st.write(df_effectivity)
             
-            st.subheader("Analysis:")
-            with st.spinner('Analyzing...(~1 minute)'):
-                sorted_by_user_rate = place_df_grouped.sort_values(by='Total Users Rated', ascending=False)
-                json_places = sorted_by_user_rate.to_json(orient='records', lines=False)
-                gpt_description = gpt_descibe(poi_density_class, poi_quality, roads_df['Road Type'].iloc[0], roads_df['Intensitas (Score)'].iloc[0], json_places)
-                st.write(gpt_description)
+    #         st.subheader("Analysis:")
+    #         with st.spinner('Analyzing...(~1 minute)'):
+    #             sorted_by_user_rate = place_df_grouped.sort_values(by='Total Users Rated', ascending=False)
+    #             json_places = sorted_by_user_rate.to_json(orient='records', lines=False)
+    #             gpt_description = gpt_descibe(poi_density_class, poi_quality, roads_df['Road Type'].iloc[0], roads_df['Intensitas (Score)'].iloc[0], json_places)
+    #             st.write(gpt_description)
                 
-                st.subheader("Input Location Map:")
+    #             st.subheader("Input Location Map:")
             
-                # Convert lat and lon to float for arithmetic operations
-                lat_float = float(lat)
-                lon_float = float(lon)
+    #             # Convert lat and lon to float for arithmetic operations
+    #             lat_float = float(lat)
+    #             lon_float = float(lon)
             
-                # Build the Google Maps Static API URL
-                base_url = "https://maps.googleapis.com/maps/api/staticmap?"
+    #             # Build the Google Maps Static API URL
+    #             base_url = "https://maps.googleapis.com/maps/api/staticmap?"
             
-                # Parameters
-                center = f"{lat_float},{lon_float}"
-                zoom = "18"
-                size = "600x300"
-                maptype = "roadmap"
-                marker = f"color:red|label:C|{lat_float},{lon_float}"
-                rad = 200
-                path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
+    #             # Parameters
+    #             center = f"{lat_float},{lon_float}"
+    #             zoom = "18"
+    #             size = "600x300"
+    #             maptype = "roadmap"
+    #             marker = f"color:red|label:C|{lat_float},{lon_float}"
+    #             rad = 200
+    #             path = f"fillcolor:0xAA000033|color:0xFFFF0033|enc:{lat_float},{lon_float}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}|{lat_float-rad/111300},{lon_float}|{lat_float},{lon_float+rad/111300}|{lat_float+rad/111300},{lon_float}|{lat_float},{lon_float-rad/111300}"
             
-                # # Constructing the full URL
-                # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
+    #             # # Constructing the full URL
+    #             # map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={path}&key={api_key}"
             
-                # Generate points for circle approximation
-                circle_points = generate_circle_points(lat_float, lon_float, rad)
+    #             # Generate points for circle approximation
+    #             circle_points = generate_circle_points(lat_float, lon_float, rad)
                 
-                # Construct circle path string
-                circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
+    #             # Construct circle path string
+    #             circle_path = "color:0xFFFF0033|weight:2|" + "|".join([f"{point[0]},{point[1]}" for point in circle_points])
                 
-                # Incorporate circle path into the full URL
-                map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
+    #             # Incorporate circle path into the full URL
+    #             map_url = f"{base_url}center={center}&zoom={zoom}&size={size}&maptype={maptype}&markers={marker}&path={circle_path}&key={api_key}"
         
-                # Display the map in Streamlit
-                st.image(map_url)
+    #             # Display the map in Streamlit
+    #             st.image(map_url)
         
-                # Display the map in Streamlit
-                st.write("Street Views")
-                # Build the Google Street View Static API URL for different directions
-                street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
-                street_view_size = "600x300"
+    #             # Display the map in Streamlit
+    #             st.write("Street Views")
+    #             # Build the Google Street View Static API URL for different directions
+    #             street_view_base_url = "https://maps.googleapis.com/maps/api/streetview?"
+    #             street_view_size = "600x300"
                 
-                directions = {
-                    "North": 0,
-                    "East": 90,
-                    "South": 180,
-                    "West": 270
-                }
+    #             directions = {
+    #                 "North": 0,
+    #                 "East": 90,
+    #                 "South": 180,
+    #                 "West": 270
+    #             }
                 
-                # Fetch and display Street View images for each direction
-                for direction_name, heading_value in directions.items():
-                    street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
+    #             # Fetch and display Street View images for each direction
+    #             for direction_name, heading_value in directions.items():
+    #                 street_view_url = f"{street_view_base_url}size={street_view_size}&location={lat_float},{lon_float}&heading={heading_value}&key={api_key}"
                     
-                    # Display the Street View image in Streamlit
-                    st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
+    #                 # Display the Street View image in Streamlit
+    #                 st.image(street_view_url, caption=f"Street View ({direction_name})", use_column_width=True)
 
-    # Menampilkan peta
-    m.add_child(MapContainer())
-    st.write(m)
+    # # Menampilkan peta
+    # m.add_child(MapContainer())
+    # st.write(m)
