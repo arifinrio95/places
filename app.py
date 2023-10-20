@@ -9,7 +9,28 @@ import pydeck as pdk
 import overpy
 # import cv2
 import numpy as np
+import openai
 
+openai.api_key = st.secrets['user_api']
+
+def gpt_descibe(poi_density, poi_quality, road_type, road_intensity_score, json_places):
+    messages = [
+        {"role": "system", "content": "Aku akan menganalisa potensi pemasangan iklan di area yang kamu jelaskan."},
+        {"role": "user", "content": f"""Jelaskan bagaimana peluang pemasangan iklan di area yang memeiliki kepadatan POI (point of interest) dengan level {poi_density},
+        dengan tingkat keramaian total dari POI2 tersebut termasuk {poi_quality}, berada di jalan dengan jenis {road_type} dengan intensitas sekitar {road_intensity_score} dari 10.
+        Berikut adalah json_string dari 60 POI yang berada di sekitarnya : {json_places}. Jelaskan kira-kira bagaimana interest atau market sesuai dengan 60 POI tersebut."""}
+    ]
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=messages,
+        max_tokens=4000,
+        temperature=0
+    )
+    script = response.choices[0].message['content']
+
+    return desc
+    
 # import json
 # from google.cloud import vision
 # from google.oauth2.service_account import Credentials
@@ -512,7 +533,12 @@ if input_method == "Input location link":
             st.markdown(f"<span style='font-size: 32px; color: red;'>{formatted_score}</span>", unsafe_allow_html=True)
             # st.write("")
             st.write(df_effectivity)
-        
+            
+            st.subheader("Analysis:")
+            json_places = sorted_df.to_json(orient='records', lines=False)
+            gpt_description = gpt_descibe(poi_density_class, poi_quality, roads_df['Road Type'].iloc[0], roads_df['Intensitas (Score)'].iloc[0], json_places)
+            st.write(gpt_description)
+            
             st.subheader("Input Location Map:")
         
             # Convert lat and lon to float for arithmetic operations
