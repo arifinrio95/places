@@ -539,7 +539,7 @@ if input_method == "Input location link":
             st.subheader("Analysis:")
             with st.spinner('Analyzing...(~1 minute)'):
                 sorted_by_user_rate = place_df_grouped.sort_values(by='Total Users Rated', ascending=False)
-                json_places = sorted_df.to_json(orient='records', lines=False)
+                json_places = sorted_by_user_rate.to_json(orient='records', lines=False)
                 gpt_description = gpt_descibe(poi_density_class, poi_quality, roads_df['Road Type'].iloc[0], roads_df['Intensitas (Score)'].iloc[0], json_places)
                 st.write(gpt_description)
                 
